@@ -36,17 +36,17 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
         return getVariableName(id.lvalue()) + '.' + id.ID().getText();
     }
 
-    private String getVariableName(LexLangParser.LvalueContext id){
+    private String getVariableName(LexLangParser.LvalueContext id) {
 
-        if(id instanceof LexLangParser.IdentifierValueContext) {
+        if (id instanceof LexLangParser.IdentifierValueContext) {
             return getVariableName((LexLangParser.IdentifierValueContext) id);
         }
 
-        if(id instanceof LexLangParser.ArrayValueContext) {
+        if (id instanceof LexLangParser.ArrayValueContext) {
             return getVariableName((LexLangParser.ArrayValueContext) id);
         }
 
-        if(id instanceof LexLangParser.ObjectValueContext) {
+        if (id instanceof LexLangParser.ObjectValueContext) {
             return getVariableName((LexLangParser.ObjectValueContext) id);
         }
 

@@ -13,7 +13,8 @@ public class FunctionScope {
         this.parentFunction = parentFunction;
     }
 
-    public FunctionScope() { }
+    public FunctionScope() {
+    }
 
     public Value getVariable(String name) {
         return scope.getVariable(name);

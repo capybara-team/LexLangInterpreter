@@ -12,28 +12,28 @@ public class Value {
         this.value = value;
     }
 
-    public Integer getInt(){
+    public Integer getInt() {
         return (Integer) value;
     }
 
-    public Float getFloat(){
+    public Float getFloat() {
         return (Float) value;
     }
 
-    public Character getChar(){
+    public Character getChar() {
         return (Character) value;
     }
 
-    public Boolean getBool(){
+    public Boolean getBool() {
         return (Boolean) value;
     }
 
-    public boolean isNumber(){
+    public boolean isNumber() {
         return value instanceof Number;
     }
 
-    public boolean isInt(){
-        return value instanceof  Integer;
+    public boolean isInt() {
+        return value instanceof Integer;
     }
 
     @Override
@@ -46,7 +46,7 @@ public class Value {
 
     @Override
     public int hashCode() {
-        if(value == null) return 0;
+        if (value == null) return 0;
         return this.value.hashCode();
     }
 
