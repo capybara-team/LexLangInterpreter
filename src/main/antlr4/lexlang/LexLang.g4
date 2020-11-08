@@ -59,7 +59,7 @@ sexp:
 	| pexp			                        # pexpCall
     ;
 pexp:
-	lvalue							        # lvalueCall
+	lvalue							        # readVarPexp
 	| '(' exp ')'						    # closurePexp
 	| 'new' type ( '[' exp ']')?		    # instancePexp
 	| ID '(' exps? ')' ('[' exp ']')?	    # funcCallPexp

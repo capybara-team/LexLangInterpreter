@@ -5,12 +5,54 @@ import org.antlr.v4.runtime.tree.RuleNode;
 
 public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
 
+    FunctionScope memory = new FunctionScope();
+
     /**
      * Run a program
      */
     public Value run(ParseTree prog) {
         return this.visit(prog);
     }
+
+    // Memory management
+
+    private void startFunction() {
+        this.memory = new FunctionScope(memory);
+    }
+
+    private void endFunction() {
+        memory = memory.getParent();
+    }
+
+    private String getVariableName(LexLangParser.IdentifierValueContext id) {
+        return id.getText();
+    }
+
+    private String getVariableName(LexLangParser.ArrayValueContext id) {
+        return this.getVariableName(id.lvalue()) + '[' + this.visit(id.exp()).getInt() + ']';
+    }
+
+    private String getVariableName(LexLangParser.ObjectValueContext id) {
+        return getVariableName(id.lvalue()) + '.' + id.ID().getText();
+    }
+
+    private String getVariableName(LexLangParser.LvalueContext id){
+
+        if(id instanceof LexLangParser.IdentifierValueContext) {
+            return getVariableName((LexLangParser.IdentifierValueContext) id);
+        }
+
+        if(id instanceof LexLangParser.ArrayValueContext) {
+            return getVariableName((LexLangParser.ArrayValueContext) id);
+        }
+
+        if(id instanceof LexLangParser.ObjectValueContext) {
+            return getVariableName((LexLangParser.ObjectValueContext) id);
+        }
+
+        throw new RuntimeException("Unregognized identifier: " + id.getText());
+    }
+
 
     @Override
     public Value visitProg(LexLangParser.ProgContext ctx) {
@@ -22,13 +64,36 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
         return super.visitFunc(ctx);
     }
 
+    // variables
+
+    @Override
+    public Value visitAttrCmd(LexLangParser.AttrCmdContext ctx) {
+        String name = this.getVariableName(ctx.lvalue());
+        Value val = visit(ctx.exp());
+        this.memory.setVariable(name, val);
+        return val;
+    }
+
+    @Override
+    public Value visitReadVarPexp(LexLangParser.ReadVarPexpContext ctx) {
+        String name = getVariableName(ctx.lvalue());
+        return memory.getVariable(name);
+    }
+
+    @Override
+    public Value visitIdentifierValue(LexLangParser.IdentifierValueContext ctx) {
+        return super.visitIdentifierValue(ctx);
+    }
+
     // while
 
     @Override
     public Value visitIterateCmd(LexLangParser.IterateCmdContext ctx) {
 
         while (visit(ctx.exp()).getBool()) {
+            memory.pushScope();
             visit(ctx.cmd());
+            memory.popScope();
         }
 
         return Value.VOID;
@@ -40,19 +105,27 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
     @Override
     public Value visitIfCmd(LexLangParser.IfCmdContext ctx) {
         Value result = visit(ctx.exp());
-        if(result.getBool())
+        if (result.getBool()) {
+            memory.pushScope();
             visit(ctx.cmd());
-        return  Value.VOID;
+            memory.popScope();
+        }
+        return Value.VOID;
     }
 
     @Override
     public Value visitElseCmd(LexLangParser.ElseCmdContext ctx) {
         Value result = visit(ctx.exp());
-        if(result.getBool())
+        if (result.getBool()) {
+            memory.pushScope();
             visit(ctx.cmd(0));
-        else
+            memory.popScope();
+        } else {
+            memory.pushScope();
             visit(ctx.cmd(1));
-        return  Value.VOID;
+            memory.popScope();
+        }
+        return Value.VOID;
     }
 
     // Logic
@@ -75,7 +148,7 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
     public Value visitCompareRexp(LexLangParser.CompareRexpContext ctx) {
         Value v1 = this.visit(ctx.rexp()),
                 v2 = this.visit(ctx.aexp());
-        if(ctx.op.getType() == LexLangParser.EQUALS)
+        if (ctx.op.getType() == LexLangParser.EQUALS)
             return new Value(v1.equals(v2));
         return new Value(!v1.equals(v2));
     }
@@ -86,8 +159,8 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
     public Value visitAddAexp(LexLangParser.AddAexpContext ctx) {
         Value v1 = this.visit(ctx.aexp()),
                 v2 = this.visit(ctx.mexp());
-        if(ctx.op.getType() == LexLangParser.PLUS)
-                return new Value(v1.getFloat() + v2.getFloat());
+        if (ctx.op.getType() == LexLangParser.PLUS)
+            return new Value(v1.getFloat() + v2.getFloat());
         return new Value(v1.getFloat() - v2.getFloat());
     }
 
@@ -103,7 +176,7 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
             case LexLangParser.MOD:
                 return new Value(v1.getFloat() % v2.getFloat());
             default:
-            throw new RuntimeException("unknown operator: " + ctx.op.getText());
+                throw new RuntimeException("unknown operator: " + ctx.op.getText());
         }
     }
 
@@ -119,7 +192,7 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
     public Value visitNegativeSexp(LexLangParser.NegativeSexpContext ctx) {
         Value value = this.visit(ctx.sexp());
         float negative = (value.isInt() ? value.getInt() : value.getFloat()) * -1;
-        if(value.isInt())
+        if (value.isInt())
             return new Value(Math.round(negative));
         return new Value(negative);
     }
@@ -156,16 +229,20 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
     @Override
     public Value visitCharSexp(LexLangParser.CharSexpContext ctx) {
         String letter = ctx.getText();
-        letter = letter.substring(1, letter.length()-1);
-        switch (letter){
+        letter = letter.substring(1, letter.length() - 1);
+        switch (letter) {
             case "\\n":
-                letter = "\n"; break;
+                letter = "\n";
+                break;
             case "\\t":
-                letter = "\t"; break;
+                letter = "\t";
+                break;
             case "\\\\":
-                letter = "\\"; break;
+                letter = "\\";
+                break;
             case "\\'":
-                letter = "'"; break;
+                letter = "'";
+                break;
         }
         return new Value(letter.charAt(0));
     }
@@ -177,12 +254,6 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
         Value value = visit(ctx.exp());
         System.out.print(value);
         return value;
-    }
-
-    // TODO: read line and return (store? where)
-    @Override
-    public Value visitReadCmd(LexLangParser.ReadCmdContext ctx) {
-        return new Value(0);
     }
     // debugging
 //    @Override
