@@ -1,133 +1,137 @@
 /**
-Maxwell Souza       201435009
-Rodolpho Rossete    201435032
-*/
+ Maxwell Souza 201435009 Rodolpho Rossete 201435032
+ */
 
 grammar LexLang;
 
-
-
-
+// Fragment helpers
 fragment DIGIT: [0-9]; // normal digit
-fragment CHAR_TYPES : ~('\\') | '\\n' | '\\t' | '\\\\' | '\\\''; // possible digits
+fragment CHAR_TYPES: // possible digits
+	~('\\')
+	| '\\n'
+	| '\\t'
+	| '\\\\'
+	| '\\\''
+    ;
 
 // Syntax
-prog : (data)* (func)*;
-data : 'data' ID '{' (decl)* '}';
-decl : ID '::' type ';';
-func : ID '(' params? ')' (':' type (',' type)* )? '{' (cmd)* '}';
-params : ID '::' type (',' ID '::' type)*;
-type : type '[' ']'
-| btype;
-btype : INT
-| CHAR
-| BOOL
-| FLOAT
-| ID;
-cmd : '{' (cmd)* '}'
-| IF '(' exp ')' cmd
-| IF '(' exp ')' cmd ELSE cmd
-| ITERATE '(' exp ')' cmd
-| READ lvalue ';'
-| PRINT exp ';'
-| RETURN exp (',' exp)* ';'
-| lvalue SET exp ';'
-| ID '(' (exps)? ')' ('<' lvalue (',' lvalue )* '>' )? ';';
-exp : exp AND exp
-| rexp;
-rexp : aexp LESS_THAN aexp
-| rexp EQUALS aexp
-| rexp NOTEQ aexp
-| aexp;
-aexp : aexp PLUS mexp
-| aexp MINUS mexp
-| mexp;
-mexp : mexp MULTIPLY sexp
-| mexp DIVIDE sexp
-| mexp MOD sexp
-| sexp;
-sexp : NOT sexp
-| MINUS sexp
-| TRUE
-| FALSE
-| NULL
-| INT_NUM
-| FLOAT_NUM
-| CHAR_VAL
-| pexp;
-pexp : lvalue
-| '(' exp ')'
-| 'new' type ( '[' exp ']' )?
-| ID '(' exps? ')' ('[' exp ']')?;
-lvalue : ID
-| lvalue '[' exp ']'
-| lvalue DOT ID;
-exps : exp  (',' exp)* ;
+prog: (data)* (func)*;
+data: 'data' ID '{' (decl)* '}';
+decl: ID '::' type ';';
+func: ID '(' params? ')' (':' type (',' type)*)? '{' (cmd)* '}';
+params: ID '::' type (',' ID '::' type)*;
+type: type '[' ']' # arrayType | btype # btypeCall;
+btype: INT | CHAR | BOOL | FLOAT | ID;
+
+cmd:
+	'{' (cmd)* '}'												# closureCmd
+	| IF '(' exp ')' cmd										# ifCmd
+	| IF '(' exp ')' cmd ELSE cmd								# elseCmd
+	| ITERATE '(' exp ')' cmd									# iterateCmd
+	| READ lvalue ';'											# readCmd
+	| PRINT exp ';'												# printCmd
+	| RETURN exp (',' exp)* ';'									# returnCmd
+	| lvalue SET exp ';'										# attrCmd
+	| ID '(' (exps)? ')' ('<' lvalue (',' lvalue)* '>')? ';'	# funcCmd
+    ;
+exp: exp AND exp # andExp | rexp # rexpCall;
+rexp:
+	aexp LESS_THAN aexp	# lessThanRexp
+	| rexp EQUALS aexp	# equalsRexp
+	| rexp NOTEQ aexp	# notEqualsRexp
+	| aexp				# aexpCall
+    ;
+aexp:
+	aexp PLUS mexp		# addAexp
+	| aexp MINUS mexp	# subtractAexp
+	| mexp				# mexpCall
+    ;
+mexp:
+	mexp MULTIPLY sexp	# multiplyMexp
+	| mexp DIVIDE sexp	# divideMexp
+	| mexp MOD sexp		# modMexp
+	| sexp				# sexpCall
+    ;
+sexp:
+	NOT sexp		# notSexp
+	| MINUS sexp	# negativeSexp
+	| TRUE			# boolSexpTrue
+	| FALSE			# boolSexpFalse
+	| NULL			# nullSexp
+	| INT_NUM		# intSexp
+	| FLOAT_NUM		# floatSexp
+	| CHAR_VAL		# charSexp
+	| pexp			# pexpCall
+    ;
+pexp:
+	lvalue							# lvalueCall
+	| '(' exp ')'						# closurePexp
+	| 'new' type ( '[' exp ']')?		# instancePexp
+	| ID '(' exps? ')' ('[' exp ']')?	# funcCallPexp
+    ;
+lvalue:
+	ID						# identifierValue
+	| lvalue '[' exp ']'	# arrayValue
+	| lvalue DOT ID			# objectValue
+    ;
+exps: exp (',' exp)*        # multipleExps;
 
 /* LEXICON */
 
-WS : [ \t\r\n]+ -> skip ;
+WS: [ \t\r\n]+ -> skip;
 COMMENT: '{-' .*? '-}' -> skip;
 LINE_COMMENT: '--' ~('\r' | '\n')* ('\r' | '\n') -> skip;
 
-
 /* keywords */
-IF:         'if'     ;
-ELSE:       'else'   ;
-ITERATE:    'iterate';
-READ:       'read'   ;
-PRINT:      'print'  ;
-RETURN:     'return' ;
-DATA:       'data'   ;
+IF: 'if';
+ELSE: 'else';
+ITERATE: 'iterate';
+READ: 'read';
+PRINT: 'print';
+RETURN: 'return';
+DATA: 'data';
 
 /* types */
-INT:    'Int'   ;
-CHAR:   'Char'  ;
-BOOL:   'Bool'  ;
-FLOAT:  'Float' ;
-NULL:   'null'  ;
-TRUE:   'true'  ;
-FALSE:  'false' ;
+INT: 'Int';
+CHAR: 'Char';
+BOOL: 'Bool';
+FLOAT: 'Float';
+NULL: 'null';
+TRUE: 'true';
+FALSE: 'false';
 
 /* identifiers */
-ID : [a-zA-Z][a-zA-Z0-9]* ;
+ID: [a-zA-Z][a-zA-Z0-9]*;
 
 /* literals */
-INT_NUM : '0' | [1-9][0-9]* ;
-FLOAT_NUM : ('0' | [1-9][0-9]*) '.' DIGIT+ ;
+INT_NUM: '0' | [1-9][0-9]*;
+FLOAT_NUM: ('0' | [1-9][0-9]*) '.' DIGIT+;
 
-CHAR_VAL : '\'' CHAR_TYPES '\'';
-//STRING : '"' .*?  '"' ; // multiline string?
-//STRING : '"' ~('\r' | '\n')*  '"' ; // TODO: corrigir aspas
+CHAR_VAL: '\'' CHAR_TYPES '\'';
+//STRING : '"' .*? '"' ; // multiline string? STRING : '"' ~('\r' | '\n')* '"' ; // TODO: corrigir
+// aspas
 
 /* operators */
-SET:        '=' ;
-EQUALS:     '==';
-NOTEQ:      '!=';
-NOT:        '!' ;
-PLUS:       '+' ;
-MINUS:      '-' ;
-MULTIPLY:   '*' ;
-DIVIDE:     '/' ;
-MOD:        '%' ;
+SET: '=';
+EQUALS: '==';
+NOTEQ: '!=';
+NOT: '!';
+PLUS: '+';
+MINUS: '-';
+MULTIPLY: '*';
+DIVIDE: '/';
+MOD: '%';
 
 /*Logic*/
-LESS_THAN :     '<' ;
-BIGGER_THAN :   '>' ;
-AND :           '&&';
-DOT :           '.' ;
-COMMA :         ',' ;
+LESS_THAN: '<';
+BIGGER_THAN: '>';
+AND: '&&';
+DOT: '.';
+COMMA: ',';
 
-ERROR_CHAR : . ; // For identify errors
+ERROR_CHAR: .; // For identify errors
 
 // Unused tokens
 
-//PAR_OPEN :      '(' ;
-//PAR_CLOSE :     ')' ;
-//BRACE_OPEN :    '{' ;
-//BRACE_CLOSE :   '}' ;
-//BRACKET_OPEN :  '[' ;
-//BRACKET_CLOSE : ']' ;
-//TYPEDEF :       '::';
-//RETURNDEF :     ':' ;
-//SEMICOL:         ';' ;
+//PAR_OPEN : '(' ; PAR_CLOSE : ')' ; BRACE_OPEN : '{' ; BRACE_CLOSE : '}' ; BRACKET_OPEN : '[' ;
+// BRACKET_CLOSE : ']' ; TYPEDEF : '::'; RETURNDEF : ':' ; SEMICOL: ';' ;
