@@ -1,57 +1,64 @@
 package lexlang;
 
-import java.util.Objects;
-
 public class Value {
-    final Object value;
+    final Object primitive;
 
     public static Value VOID = new Value(new Object());
 
 
     public Value(Object value) {
-        this.value = value;
+        this.primitive = value;
     }
 
     public Integer getInt() {
-        return (Integer) value;
+        return (Integer) primitive;
     }
 
     public Float getFloat() {
-        return (Float) value;
+        if (primitive instanceof Float) {
+            return (Float) primitive;
+        }
+        return ((Number) primitive).floatValue();
     }
 
     public Character getChar() {
-        return (Character) value;
+        return (Character) primitive;
     }
 
     public Boolean getBool() {
-        return (Boolean) value;
+        return (Boolean) primitive;
     }
 
     public boolean isNumber() {
-        return value instanceof Number;
+        return primitive instanceof Number;
     }
 
     public boolean isInt() {
-        return value instanceof Integer;
+        return primitive instanceof Integer;
+    }
+
+    public Object getRawValue() {
+        return primitive;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (value == o) return true;
+        if (primitive == o) return true;
 //        if (value == null || o == null || o.getClass() != value.getClass()) return false; // TODO: check why this exists
-        Value value1 = (Value) o;
-        return this.value.equals(value1.value);
+        Value comparedValue = (Value) o;
+        if (comparedValue.getRawValue() instanceof Number && this.primitive instanceof Number)
+            return this.getFloat().equals(comparedValue.getFloat());
+        return this.primitive.equals(comparedValue.getRawValue());
     }
 
     @Override
     public int hashCode() {
-        if (value == null) return 0;
-        return this.value.hashCode();
+        if (primitive == null) return 0;
+        return this.primitive.hashCode();
     }
 
     @Override
     public String toString() {
-        return String.valueOf(value);
+        return String.valueOf(primitive);
     }
 }

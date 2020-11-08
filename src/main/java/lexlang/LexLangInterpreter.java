@@ -53,6 +53,18 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
         throw new RuntimeException("Unregognized identifier: " + id.getText());
     }
 
+    private Value resolveNumber(float result, Value v1, Value v2) {
+        if (v1.getRawValue() instanceof Integer && v2.getRawValue() instanceof Integer)
+            return new Value(((Float) result).intValue());
+        return new Value(result);
+
+    }
+
+    private Value resolveNumber(float result, Value v1) {
+        return resolveNumber(result, v1, new Value((Integer) 0));
+
+    }
+    // Visitors
 
     @Override
     public Value visitProg(LexLangParser.ProgContext ctx) {
@@ -160,8 +172,8 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
         Value v1 = this.visit(ctx.aexp()),
                 v2 = this.visit(ctx.mexp());
         if (ctx.op.getType() == LexLangParser.PLUS)
-            return new Value(v1.getFloat() + v2.getFloat());
-        return new Value(v1.getFloat() - v2.getFloat());
+            return resolveNumber(v1.getFloat() + v2.getFloat(), v1, v2);
+        return resolveNumber(v1.getFloat() - v2.getFloat(), v1, v2);
     }
 
     @Override
@@ -170,11 +182,11 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
                 v2 = this.visit(ctx.sexp());
         switch (ctx.op.getType()) {
             case LexLangParser.MULTIPLY:
-                return new Value(v1.getFloat() * v2.getFloat());
+                return resolveNumber(v1.getFloat() * v2.getFloat(), v1, v2);
             case LexLangParser.DIVIDE:
-                return new Value(v1.getFloat() / v2.getFloat());
+                return resolveNumber(v1.getFloat() / v2.getFloat(), v1, v2);
             case LexLangParser.MOD:
-                return new Value(v1.getFloat() % v2.getFloat());
+                return resolveNumber(v1.getFloat() % v2.getFloat(), v1, v2);
             default:
                 throw new RuntimeException("unknown operator: " + ctx.op.getText());
         }
@@ -187,14 +199,11 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
         return new Value(!value.getBool());
     }
 
-    // TODO: improve usage of int and float
     @Override
     public Value visitNegativeSexp(LexLangParser.NegativeSexpContext ctx) {
         Value value = this.visit(ctx.sexp());
-        float negative = (value.isInt() ? value.getInt() : value.getFloat()) * -1;
-        if (value.isInt())
-            return new Value(Math.round(negative));
-        return new Value(negative);
+        float negative = value.getFloat() * -1;
+        return resolveNumber(negative, value);
     }
 
     @Override
@@ -215,9 +224,9 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
         return new Value(null);
     }
 
-    @Override // FIXME: INT not FLOAT
+    @Override
     public Value visitIntSexp(LexLangParser.IntSexpContext ctx) {
-        return new Value(Float.valueOf(ctx.getText()));
+        return new Value(Integer.valueOf(ctx.getText()));
     }
 
 
