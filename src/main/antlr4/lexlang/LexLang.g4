@@ -36,45 +36,40 @@ cmd:
     ;
 exp: exp AND exp # andExp | rexp # rexpCall;
 rexp:
-	aexp LESS_THAN aexp	# lessThanRexp
-	| rexp EQUALS aexp	# equalsRexp
-	| rexp NOTEQ aexp	# notEqualsRexp
-	| aexp				# aexpCall
+	aexp LESS_THAN aexp	                    # lessThanRexp
+	| rexp op=(EQUALS | NOTEQ) aexp	        # compareRexp
+	| aexp				                    # aexpCall
     ;
 aexp:
-	aexp PLUS mexp		# addAexp
-	| aexp MINUS mexp	# subtractAexp
-	| mexp				# mexpCall
+	aexp op=(PLUS | MINUS) mexp             # addAexp
+	| mexp                                  # mexpCall
     ;
 mexp:
-	mexp MULTIPLY sexp	# multiplyMexp
-	| mexp DIVIDE sexp	# divideMexp
-	| mexp MOD sexp		# modMexp
-	| sexp				# sexpCall
+	mexp op=(MULTIPLY | DIVIDE | MOD) sexp  # multiplyMexp
+	| sexp				                    # sexpCall
     ;
 sexp:
-	NOT sexp		# notSexp
-	| MINUS sexp	# negativeSexp
-	| TRUE			# boolSexpTrue
-	| FALSE			# boolSexpFalse
-	| NULL			# nullSexp
-	| INT_NUM		# intSexp
-	| FLOAT_NUM		# floatSexp
-	| CHAR_VAL		# charSexp
-	| pexp			# pexpCall
+	NOT sexp		                        # notSexp
+	| MINUS sexp	                        # negativeSexp
+	| (TRUE | FALSE)                        # boolSexp
+	| NULL			                        # nullSexp
+	| INT_NUM		                        # intSexp
+	| FLOAT_NUM		                        # floatSexp
+	| CHAR_VAL		                        # charSexp
+	| pexp			                        # pexpCall
     ;
 pexp:
-	lvalue							# lvalueCall
-	| '(' exp ')'						# closurePexp
-	| 'new' type ( '[' exp ']')?		# instancePexp
-	| ID '(' exps? ')' ('[' exp ']')?	# funcCallPexp
+	lvalue							        # lvalueCall
+	| '(' exp ')'						    # closurePexp
+	| 'new' type ( '[' exp ']')?		    # instancePexp
+	| ID '(' exps? ')' ('[' exp ']')?	    # funcCallPexp
     ;
 lvalue:
-	ID						# identifierValue
-	| lvalue '[' exp ']'	# arrayValue
-	| lvalue DOT ID			# objectValue
+	ID						                # identifierValue
+	| lvalue '[' exp ']'	                # arrayValue
+	| lvalue DOT ID			                # objectValue
     ;
-exps: exp (',' exp)*        # multipleExps;
+exps: exp (',' exp)*                        # multipleExps;
 
 /* LEXICON */
 

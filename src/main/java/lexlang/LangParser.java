@@ -13,15 +13,15 @@ public class LangParser {
         File file  = new File(path);
         try{
             if( file.exists() ){
-                System.out.println("Executando: " + file.getPath());
+                // System.out.println("Executando: " + file.getPath());
 
 
                 LexLangLexer lexer = new LexLangLexer(new ANTLRFileStream(file.getPath()));
                 LexLangParser parser = new LexLangParser(new CommonTokenStream(lexer));
                 ParseTree tree =  parser.prog();
-                Visitor visitor = new Visitor();
-                System.out.println(tree.getText());
-                visitor.visit(tree);
+                LexLangInterpreter lexLangInterpreter = new LexLangInterpreter();
+                // System.out.println(tree.getText());
+                lexLangInterpreter.run(tree);
 
             }else{
                 System.out.println("O caminho " + file.getPath() + " não existe.");
