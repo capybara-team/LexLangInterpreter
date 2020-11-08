@@ -3,9 +3,14 @@ package lexlang;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 
+import java.io.InputStreamReader;
+import java.util.Scanner;
+
 public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
 
     FunctionScope memory = new FunctionScope();
+
+    Scanner reader = new Scanner(new InputStreamReader(System.in));
 
     /**
      * Run a program
@@ -264,6 +269,14 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
         System.out.print(value);
         return value;
     }
+
+    @Override
+    public Value visitReadCmd(LexLangParser.ReadCmdContext ctx) {
+        String name = getVariableName(ctx.lvalue());
+        String response = reader.nextLine();
+        return memory.setVariable(name, new Value(Float.valueOf(response)));
+    }
+
     // debugging
 //    @Override
 //    public Value visitChildren(RuleNode node) {
