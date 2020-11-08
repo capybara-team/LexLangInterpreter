@@ -3,12 +3,12 @@ package lexlang;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 
-public class LexLangInterpreter extends LexLangBaseVisitor<Value>{
+public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
 
     /**
      * Run a program
      */
-    public Value run(ParseTree prog){
+    public Value run(ParseTree prog) {
         return this.visit(prog);
     }
 
@@ -22,8 +22,40 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value>{
         return super.visitFunc(ctx);
     }
 
-    // Logic
+    // while
 
+    @Override
+    public Value visitIterateCmd(LexLangParser.IterateCmdContext ctx) {
+
+        while (visit(ctx.exp()).getBool()) {
+            visit(ctx.cmd());
+        }
+
+        return Value.VOID;
+    }
+
+
+    // if
+
+    @Override
+    public Value visitIfCmd(LexLangParser.IfCmdContext ctx) {
+        Value result = visit(ctx.exp());
+        if(result.getBool())
+            visit(ctx.cmd());
+        return  Value.VOID;
+    }
+
+    @Override
+    public Value visitElseCmd(LexLangParser.ElseCmdContext ctx) {
+        Value result = visit(ctx.exp());
+        if(result.getBool())
+            visit(ctx.cmd(0));
+        else
+            visit(ctx.cmd(1));
+        return  Value.VOID;
+    }
+
+    // Logic
 
     @Override
     public Value visitAndExp(LexLangParser.AndExpContext ctx) {

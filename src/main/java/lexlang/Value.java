@@ -5,6 +5,9 @@ import java.util.Objects;
 public class Value {
     final Object value;
 
+    public static Value VOID = new Value(new Object());
+
+
     public Value(Object value) {
         this.value = value;
     }
@@ -36,7 +39,6 @@ public class Value {
     @Override
     public boolean equals(Object o) {
         if (value == o) return true;
-        System.out.println(value.getClass());
 //        if (value == null || o == null || o.getClass() != value.getClass()) return false; // TODO: check why this exists
         Value value1 = (Value) o;
         return this.value.equals(value1.value);
