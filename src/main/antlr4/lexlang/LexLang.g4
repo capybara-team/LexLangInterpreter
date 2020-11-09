@@ -18,7 +18,8 @@ fragment CHAR_TYPES: // possible digits
 prog: (data)* (func)*;
 data: 'data' ID '{' (decl)* '}';
 decl: ID '::' type ';';
-func: ID '(' params? ')' (':' type (',' type)*)? '{' (cmd)* '}';
+func: ID '(' params? ')' (':' type (',' type)*)? '{' funcCmds '}';
+funcCmds: (cmd)*;
 params: ID '::' type (',' ID '::' type)*;
 type: type '[' ']' # arrayType | btype # btypeCall;
 btype: INT | CHAR | BOOL | FLOAT | ID;
@@ -69,7 +70,7 @@ lvalue:
 	| lvalue '[' exp ']'	                # arrayValue
 	| lvalue DOT ID			                # objectValue
     ;
-exps: exp (',' exp)*                        # multipleExps;
+exps: exp (',' exp)*;
 
 /* LEXICON */
 

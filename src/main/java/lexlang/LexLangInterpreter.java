@@ -1,9 +1,11 @@
 package lexlang;
 
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.RuleNode;
 
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Scanner;
 
 public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
@@ -11,6 +13,8 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
     FunctionScope memory = new FunctionScope();
 
     Scanner reader = new Scanner(new InputStreamReader(System.in));
+
+    HashMap<String, FunctionDeclaration> functions = new HashMap<>();
 
     /**
      * Run a program
@@ -21,12 +25,30 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
 
     // Memory management
 
-    private void startFunction() {
+    private Value runFunction(String name, LexLangParser.ExpsContext exps) {
+        if (!functions.containsKey(name))
+            throw new RuntimeException("Function '" + name + "' not found");
+
+
+        List<Value> args = new ArrayList<>();
+        FunctionDeclaration func = functions.get(name);
+
+        if (exps != null)
+            for (LexLangParser.ExpContext expContext : exps.exp()) {
+                args.add(visit(expContext));
+            }
+
+
         this.memory = new FunctionScope(memory);
+        for (int i = 0; i < func.getArguments().size(); i++)
+            memory.setVariable(func.getArguments().get(i).name, args.get(i));
+        Value v = visit(func.getCommands());
+        this.memory = memory.getParent();
+        return v;
     }
 
-    private void endFunction() {
-        memory = memory.getParent();
+    private Value runFunction(String name) {
+        return runFunction(name, null);
     }
 
     private String getVariableName(LexLangParser.IdentifierValueContext id) {
@@ -73,12 +95,22 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
 
     @Override
     public Value visitProg(LexLangParser.ProgContext ctx) {
-        return super.visitProg(ctx);
+        this.visitChildren(ctx);
+        return this.runFunction("main");
+    }
+
+    // functions
+    @Override
+    public Value visitFunc(LexLangParser.FuncContext ctx) {
+        FunctionDeclaration f = new FunctionDeclaration(ctx);
+        functions.put(f.getId(), f);
+        return Value.VOID;
     }
 
     @Override
-    public Value visitFunc(LexLangParser.FuncContext ctx) {
-        return super.visitFunc(ctx);
+    public Value visitFuncCmd(LexLangParser.FuncCmdContext ctx) {
+        String name = ctx.ID().getText();
+        return runFunction(name, ctx.exps());
     }
 
     // variables
