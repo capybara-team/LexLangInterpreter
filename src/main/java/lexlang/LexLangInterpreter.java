@@ -1,6 +1,7 @@
 package lexlang;
 
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.RuleNode;
 
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -15,6 +16,8 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
     Scanner reader = new Scanner(new InputStreamReader(System.in));
 
     HashMap<String, FunctionDeclaration> functions = new HashMap<>();
+
+    Boolean returnCalled = false;
 
     /**
      * Run a program
@@ -43,6 +46,7 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
         for (int i = 0; i < func.getArguments().size(); i++)
             memory.setVariable(func.getArguments().get(i).name, args.get(i));
         Value v = visit(func.getCommands());
+        this.returnCalled = false;
         this.memory = memory.getParent();
         return v;
     }
@@ -110,9 +114,29 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
     @Override
     public Value visitFuncCmd(LexLangParser.FuncCmdContext ctx) {
         String name = ctx.ID().getText();
+        Value ret = runFunction(name, ctx.exps());
+        if (ctx.lvalue(0) != null)
+            memory.setVariable(getVariableName(ctx.lvalue(0)), ret);
+        return ret;
+    }
+
+    @Override
+    public Value visitFuncCallPexp(LexLangParser.FuncCallPexpContext ctx) {
+        String name = ctx.ID().getText();
         return runFunction(name, ctx.exps());
     }
 
+    @Override
+    public Value visitReturnCmd(LexLangParser.ReturnCmdContext ctx) {
+        Value ret = visit(ctx.exp(0));
+        this.returnCalled = true;
+        return ret;
+    }
+
+    @Override
+    protected boolean shouldVisitNextChild(RuleNode node, Value currentResult) {
+        return !this.returnCalled;
+    }
     // variables
 
     @Override
