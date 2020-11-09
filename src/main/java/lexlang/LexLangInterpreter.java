@@ -18,6 +18,7 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
     HashMap<String, FunctionDeclaration> functions = new HashMap<>();
 
     Boolean returnCalled = false;
+    List<Value> returnValues = null; // TODO: Improve function n-uple usage.
 
     /**
      * Run a program
@@ -115,22 +116,33 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
     public Value visitFuncCmd(LexLangParser.FuncCmdContext ctx) {
         String name = ctx.ID().getText();
         Value ret = runFunction(name, ctx.exps());
-        if (ctx.lvalue(0) != null)
-            memory.setVariable(getVariableName(ctx.lvalue(0)), ret);
+        for (int i = 0; i < ctx.lvalue().size(); i++) {
+            memory.setVariable(
+                    getVariableName(ctx.lvalue(i))
+                    , returnValues.get(i));
+        }
+        returnValues = null;
         return ret;
     }
 
     @Override
     public Value visitFuncCallPexp(LexLangParser.FuncCallPexpContext ctx) {
         String name = ctx.ID().getText();
-        return runFunction(name, ctx.exps());
+        Value result = runFunction(name, ctx.exps());
+        if(ctx.exp() != null)
+            result = returnValues.get(visit(ctx.exp()).getInt());
+        returnValues = null;
+        return result;
     }
 
     @Override
     public Value visitReturnCmd(LexLangParser.ReturnCmdContext ctx) {
-        Value ret = visit(ctx.exp(0));
+        this.returnValues = new ArrayList<>();
+        for (LexLangParser.ExpContext expContext : ctx.exp()) {
+            this.returnValues.add(visit(expContext));
+        }
         this.returnCalled = true;
-        return ret;
+        return this.returnValues.get(0);
     }
 
     @Override
