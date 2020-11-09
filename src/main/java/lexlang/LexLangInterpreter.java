@@ -163,13 +163,14 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
     @Override
     public Value visitIterateCmd(LexLangParser.IterateCmdContext ctx) {
 
+        Value partialResult = Value.VOID;
         while (visit(ctx.exp()).getBool()) {
             memory.pushScope();
-            visit(ctx.cmd());
+            partialResult = visit(ctx.cmd());
             memory.popScope();
         }
 
-        return Value.VOID;
+        return partialResult;
     }
 
 
@@ -180,10 +181,10 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
         Value result = visit(ctx.exp());
         if (result.getBool()) {
             memory.pushScope();
-            visit(ctx.cmd());
+            result = visit(ctx.cmd());
             memory.popScope();
         }
-        return Value.VOID;
+        return result;
     }
 
     @Override
@@ -191,14 +192,14 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
         Value result = visit(ctx.exp());
         if (result.getBool()) {
             memory.pushScope();
-            visit(ctx.cmd(0));
+            result = visit(ctx.cmd(0));
             memory.popScope();
         } else {
             memory.pushScope();
-            visit(ctx.cmd(1));
+            result = visit(ctx.cmd(1));
             memory.popScope();
         }
-        return Value.VOID;
+        return result;
     }
 
     // Logic
@@ -323,6 +324,7 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
     public Value visitPrintCmd(LexLangParser.PrintCmdContext ctx) {
         Value value = visit(ctx.exp());
         System.out.print(value);
+
         return value;
     }
 

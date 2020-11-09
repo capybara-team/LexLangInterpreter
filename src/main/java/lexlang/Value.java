@@ -3,7 +3,7 @@ package lexlang;
 public class Value {
     final Object primitive;
 
-    public static Value VOID = new Value(new Object());
+    public static Value VOID = new Value(null);
 
 
     public Value(Object value) {
