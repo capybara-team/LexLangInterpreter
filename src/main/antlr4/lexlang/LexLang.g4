@@ -63,7 +63,7 @@ pexp:
 	lvalue							        # readVarPexp
 	| '(' exp ')'						    # closurePexp
 	| 'new' type ( '[' exp ']')?		    # instancePexp
-	| ID '(' exps? ')' ('[' exp ']')?	    # funcCallPexp
+	| ID '(' exps? ')' '[' exp ']'	        # funcCallPexp
     ;
 lvalue:
 	ID						                # identifierValue

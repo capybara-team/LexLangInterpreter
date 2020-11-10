@@ -4,10 +4,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
 
@@ -15,6 +12,7 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
 
     Scanner reader = new Scanner(new InputStreamReader(System.in));
 
+    HashMap<String, DataDeclaration> dataTypes = new HashMap<>();
     HashMap<String, FunctionDeclaration> functions = new HashMap<>();
 
     Boolean returnCalled = false;
@@ -38,9 +36,8 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
         FunctionDeclaration func = functions.get(name);
 
         if (exps != null)
-            for (LexLangParser.ExpContext expContext : exps.exp()) {
+            for (LexLangParser.ExpContext expContext : exps.exp())
                 args.add(visit(expContext));
-            }
 
 
         this.memory = new FunctionScope(memory);
@@ -56,33 +53,57 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
         return runFunction(name, null);
     }
 
-    private String getVariableName(LexLangParser.IdentifierValueContext id) {
-        return id.getText();
+//    private String getVariableName(LexLangParser.IdentifierValueContext id) {
+//        return id.getText();
+//    }
+//
+//    private String getVariableName(LexLangParser.ArrayValueContext id) {
+//        return this.getVariableName(id.lvalue()) + '[' + this.visit(id.exp()).getInt() + ']';
+//    }
+//
+//    private String getVariableName(LexLangParser.ObjectValueContext id) {
+//        return getVariableName(id.lvalue()) + '.' + id.ID().getText();
+//    }
+//
+//    private String getVariableName(LexLangParser.LvalueContext id) {
+//
+//        if (id instanceof LexLangParser.IdentifierValueContext) {
+//            return getVariableName((LexLangParser.IdentifierValueContext) id);
+//        }
+//
+//        if (id instanceof LexLangParser.ArrayValueContext) {
+//            return getVariableName((LexLangParser.ArrayValueContext) id);
+//        }
+//
+//        if (id instanceof LexLangParser.ObjectValueContext) {
+//            return getVariableName((LexLangParser.ObjectValueContext) id);
+//        }
+//
+//        throw new RuntimeException("Unregognized identifier: " + id.getText());
+//    }
+
+    private Value resolveVariable(LexLangParser.LvalueContext ctx, Value set) {
+        if (ctx instanceof LexLangParser.ObjectValueContext) {
+            LexLangParser.ObjectValueContext rule = (LexLangParser.ObjectValueContext) ctx;
+            String field = rule.ID().getText();
+            Value obj = resolveVariable(rule.lvalue());
+            if(set != null) return obj.getData().put(field, set);
+            return obj.getData().get(field);
+        }
+        if (ctx instanceof LexLangParser.ArrayValueContext) {
+            LexLangParser.ArrayValueContext rule = ((LexLangParser.ArrayValueContext) ctx);
+            int i = visit(rule.exp()).getInt();
+            Value arr = resolveVariable(rule.lvalue());
+            if(set != null) return arr.getArray().set(i, set);
+            return arr.getArray().get(i);
+        }
+        LexLangParser.IdentifierValueContext rule = (LexLangParser.IdentifierValueContext) ctx;
+        if(set != null) return memory.setVariable(rule.ID(), set);
+        return memory.getVariable(rule.ID());
     }
 
-    private String getVariableName(LexLangParser.ArrayValueContext id) {
-        return this.getVariableName(id.lvalue()) + '[' + this.visit(id.exp()).getInt() + ']';
-    }
-
-    private String getVariableName(LexLangParser.ObjectValueContext id) {
-        return getVariableName(id.lvalue()) + '.' + id.ID().getText();
-    }
-
-    private String getVariableName(LexLangParser.LvalueContext id) {
-
-        if (id instanceof LexLangParser.IdentifierValueContext) {
-            return getVariableName((LexLangParser.IdentifierValueContext) id);
-        }
-
-        if (id instanceof LexLangParser.ArrayValueContext) {
-            return getVariableName((LexLangParser.ArrayValueContext) id);
-        }
-
-        if (id instanceof LexLangParser.ObjectValueContext) {
-            return getVariableName((LexLangParser.ObjectValueContext) id);
-        }
-
-        throw new RuntimeException("Unregognized identifier: " + id.getText());
+    private Value resolveVariable(LexLangParser.LvalueContext ctx) {
+        return resolveVariable(ctx, null);
     }
 
     private Value resolveNumber(float result, Value v1, Value v2) {
@@ -96,12 +117,36 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
         return resolveNumber(result, v1, new Value((Integer) 0));
 
     }
+
+    @Override
+    protected boolean shouldVisitNextChild(RuleNode node, Value currentResult) {
+        return !this.returnCalled;
+    }
+
     // Visitors
 
     @Override
     public Value visitProg(LexLangParser.ProgContext ctx) {
         this.visitChildren(ctx);
         return this.runFunction("main");
+    }
+
+    // Data
+    @Override
+    public Value visitData(LexLangParser.DataContext ctx) {
+        String name = ctx.ID().getText();
+        DataDeclaration d = new DataDeclaration(ctx);
+        dataTypes.put(d.getId(), d);
+        return Value.VOID;
+    }
+
+    // TODO: read array
+    @Override
+    public Value visitInstancePexp(LexLangParser.InstancePexpContext ctx) {
+        String type = ctx.type().getText();
+        if (List.of("Int", "Char", "Bool", "Float").contains(type))
+            return new Value(null);
+        return new Value(new Data(dataTypes.get(type)));
     }
 
     // functions
@@ -117,9 +162,7 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
         String name = ctx.ID().getText();
         Value ret = runFunction(name, ctx.exps());
         for (int i = 0; i < ctx.lvalue().size(); i++) {
-            memory.setVariable(
-                    getVariableName(ctx.lvalue(i))
-                    , returnValues.get(i));
+            resolveVariable(ctx.lvalue(i), returnValues.get(i));
         }
         returnValues = null;
         return ret;
@@ -129,7 +172,7 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
     public Value visitFuncCallPexp(LexLangParser.FuncCallPexpContext ctx) {
         String name = ctx.ID().getText();
         Value result = runFunction(name, ctx.exps());
-        if(ctx.exp() != null)
+        if (ctx.exp() != null)
             result = returnValues.get(visit(ctx.exp()).getInt());
         returnValues = null;
         return result;
@@ -145,24 +188,16 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
         return this.returnValues.get(0);
     }
 
-    @Override
-    protected boolean shouldVisitNextChild(RuleNode node, Value currentResult) {
-        return !this.returnCalled;
-    }
     // variables
 
     @Override
     public Value visitAttrCmd(LexLangParser.AttrCmdContext ctx) {
-        String name = this.getVariableName(ctx.lvalue());
-        Value val = visit(ctx.exp());
-        this.memory.setVariable(name, val);
-        return val;
+        return resolveVariable(ctx.lvalue(), visit(ctx.exp()));
     }
 
     @Override
     public Value visitReadVarPexp(LexLangParser.ReadVarPexpContext ctx) {
-        String name = getVariableName(ctx.lvalue());
-        return memory.getVariable(name);
+        return resolveVariable(ctx.lvalue());
     }
 
     @Override
@@ -342,9 +377,8 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
 
     @Override
     public Value visitReadCmd(LexLangParser.ReadCmdContext ctx) {
-        String name = getVariableName(ctx.lvalue());
         String response = reader.nextLine();
-        return memory.setVariable(name, new Value(Float.valueOf(response)));
+        return resolveVariable(ctx.lvalue(), new Value(Float.valueOf(response)));
     }
 
     // debugging

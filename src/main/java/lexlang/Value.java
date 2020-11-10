@@ -41,6 +41,14 @@ public class Value {
         return primitive;
     }
 
+    public Data getData() {
+        return (Data) primitive;
+    }
+
+    public ArrayValue getArray(){
+        return (ArrayValue) primitive;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (primitive == o) return true;

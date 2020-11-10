@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+// TODO: support overload
 public class FunctionDeclaration {
     private String id;
 
@@ -18,6 +19,7 @@ public class FunctionDeclaration {
         if (ctx.params() != null) {
             for (int i = 0; i < ctx.params().ID().size(); i++) {
                 arguments.add(
+                        // TODO: Fix array
                         new FunctionArgument(
                                 ctx.params().ID().get(i).getText(),
                                 ctx.params().type().get(i).getText())
