@@ -24,7 +24,10 @@ public class ArrayValue {
     }
 
     public Value get(int i) {
+        if (values.size() <= i)
+            throw new LangException("Index " + i + " out of bounds for length " + values.size());
         return values.get(i);
+
     }
 
     public Value set(int i, Value value) {

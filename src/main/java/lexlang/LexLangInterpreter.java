@@ -18,6 +18,7 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
 
     Boolean returnCalled = false;
     List<Value> returnValues = null; // TODO: Improve function n-tuple usage.
+    ParseTree visiting = null;
 
     /**
      * Run a program
@@ -56,6 +57,8 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
             String field = rule.ID().getText();
             Value obj = resolveVariable(rule.lvalue());
             if (set != null) return obj.getData().put(field, set);
+            if (!(obj.getRawValue() instanceof Data))
+                throw new LangException("Cannot access property '" + field + "' on non-data value " + rule.getText());
             return obj.getData().get(field);
         }
         if (ctx instanceof LexLangParser.ArrayValueContext) {
@@ -97,7 +100,18 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
     // TODO: catch execution error and display line and row
     @Override
     public Value visit(ParseTree tree) {
-        return super.visit(tree);
+        try {
+            return super.visit(tree);
+        } catch (LangException e) {
+            if (!(tree instanceof ParserRuleContext)) throw e;
+
+            System.err.println("Line " +
+                    ((ParserRuleContext) tree).getStart().getLine() + ':' +
+                    ((ParserRuleContext) tree).getStart().getCharPositionInLine() + ' ' +
+                    e.getMessage());
+            System.exit(1);
+            return null;
+        }
     }
 
     @Override
@@ -131,6 +145,8 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
         }
         if (List.of("Int", "Char", "Bool", "Float").contains(type))
             return new Value(null);
+        if (!dataTypes.containsKey(type))
+            throw new LangException("Data '" + type + "' not found");
         return new Value(new Data(dataTypes.get(type)));
     }
 
@@ -157,8 +173,17 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
     public Value visitFuncCallPexp(LexLangParser.FuncCallPexpContext ctx) {
         String name = ctx.ID().getText();
         Value result = runFunction(name, ctx.exps());
-        if (ctx.exp() != null)
-            result = returnValues.get(visit(ctx.exp()).getInt());
+        if (ctx.exp() != null) {
+            int i = visit(ctx.exp()).getInt();
+            if (returnValues == null)
+                throw new LangException("Function '" + name +
+                        "' doesn't returns arguments, tried to access argument [" + i + ']');
+            if (i >= returnValues.size())
+                throw new LangException("Function '" + name +
+                        "' only returns " + returnValues.size() +
+                        " arguments, tried to access argument [" + i + ']');
+            result = returnValues.get(i);
+        }
         returnValues = null;
         return result;
     }
