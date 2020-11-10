@@ -1,5 +1,6 @@
 package lexlang;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 
@@ -29,7 +30,7 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
 
     private Value runFunction(String name, LexLangParser.ExpsContext exps) {
         if (!functions.containsKey(name))
-            throw new RuntimeException("Function '" + name + "' not found");
+            throw new LangException("Function '" + name + "' not found");
 
 
         List<Value> args = new ArrayList<>();
@@ -281,7 +282,7 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
             case LexLangParser.MOD:
                 return resolveNumber(v1.getFloat() % v2.getFloat(), v1, v2);
             default:
-                throw new RuntimeException("unknown operator: " + ctx.op.getText());
+                throw new LangException("unknown operator: " + ctx.op.getText());
         }
     }
 

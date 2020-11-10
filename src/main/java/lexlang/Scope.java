@@ -17,7 +17,7 @@ public class Scope {
         Value val = memory.get(name);
         if (val != null) return val;
         if (parent != null) return parent.getVariable(name);
-        else throw new RuntimeException("Cannot find variable: " + name);
+        else throw new LangException("Cannot find variable: " + name);
     }
 
     private Value updateVariable(String name, Value value) {
