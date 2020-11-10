@@ -15,10 +15,7 @@ public class Data {
 
     @Override
     public String toString() {
-        return "Data{" +
-                "type=" + type +
-                ", values=" + values +
-                '}';
+        return type.getId() + ' ' + values;
     }
 
     public Value get(Object key) {

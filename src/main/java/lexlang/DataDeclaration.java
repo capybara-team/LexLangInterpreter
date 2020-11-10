@@ -11,9 +11,8 @@ public class DataDeclaration {
     public DataDeclaration(LexLangParser.DataContext ctx) {
         id = ctx.ID().getText();
         if (ctx.decl() != null)
-            for (LexLangParser.DeclContext declContext : ctx.decl())
-                // TODO: Fix array
-                types.add(new DataType(declContext.ID().getText(), declContext.type().getText()));
+            for (LexLangParser.DeclContext declCtx : ctx.decl())
+                types.add(new DataType(declCtx.ID().getText(), declCtx.type()));
 
     }
 
@@ -27,9 +26,9 @@ public class DataDeclaration {
 
     public static class DataType {
         String name;
-        String type;
+        LexLangParser.TypeContext type;
 
-        public DataType(String name, String type) {
+        public DataType(String name, LexLangParser.TypeContext type) {
             this.name = name;
             this.type = type;
         }

@@ -52,7 +52,8 @@ public class Value {
     @Override
     public boolean equals(Object o) {
         if (primitive == o) return true;
-//        if (value == null || o == null || o.getClass() != value.getClass()) return false; // TODO: check why this exists
+        // TODO: check why this exists
+//      if (value == null || o == null || o.getClass() != value.getClass()) return false;
         Value comparedValue = (Value) o;
         if (comparedValue.getRawValue() instanceof Number && this.primitive instanceof Number)
             return this.getFloat().equals(comparedValue.getFloat());

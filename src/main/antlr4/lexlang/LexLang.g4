@@ -104,7 +104,6 @@ INT_NUM: '0' | [1-9][0-9]*;
 FLOAT_NUM: ('0' | [1-9][0-9]*) '.' DIGIT+;
 
 CHAR_VAL: '\'' CHAR_TYPES '\'';
-//STRING : '"' .*? '"' ; // multiline string? STRING : '"' ~('\r' | '\n')* '"' ; // TODO: corrigir
 // aspas
 
 /* operators */

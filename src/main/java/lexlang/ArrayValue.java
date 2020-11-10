@@ -8,8 +8,15 @@ public class ArrayValue {
     String type = null;
     List<Value> values;
 
-    public ArrayValue(int size) {
-        this.values = new ArrayList<>(size);
+    public ArrayValue(int size, String type) {
+        initValues(size);
+        this.type = type;
+    }
+
+    private void initValues(int size) {
+        values = new ArrayList<>(size);
+        for (int i = 0; i < size; i++)
+            values.add(Value.VOID);
     }
 
     public Value get(int i) {
@@ -26,7 +33,7 @@ public class ArrayValue {
 
     @Override
     public String toString() {
-        if(type == "Char")
+        if (type == "Char")
             return values.stream().map(Object::toString).collect(Collectors.joining(""));
         return "ArrayValue{" +
                 "type='" + type + '\'' +

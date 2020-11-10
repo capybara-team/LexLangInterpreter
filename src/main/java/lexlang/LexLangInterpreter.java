@@ -87,18 +87,18 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
             LexLangParser.ObjectValueContext rule = (LexLangParser.ObjectValueContext) ctx;
             String field = rule.ID().getText();
             Value obj = resolveVariable(rule.lvalue());
-            if(set != null) return obj.getData().put(field, set);
+            if (set != null) return obj.getData().put(field, set);
             return obj.getData().get(field);
         }
         if (ctx instanceof LexLangParser.ArrayValueContext) {
             LexLangParser.ArrayValueContext rule = ((LexLangParser.ArrayValueContext) ctx);
             int i = visit(rule.exp()).getInt();
             Value arr = resolveVariable(rule.lvalue());
-            if(set != null) return arr.getArray().set(i, set);
+            if (set != null) return arr.getArray().set(i, set);
             return arr.getArray().get(i);
         }
         LexLangParser.IdentifierValueContext rule = (LexLangParser.IdentifierValueContext) ctx;
-        if(set != null) return memory.setVariable(rule.ID(), set);
+        if (set != null) return memory.setVariable(rule.ID(), set);
         return memory.getVariable(rule.ID());
     }
 
@@ -140,10 +140,21 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
         return Value.VOID;
     }
 
-    // TODO: read array
     @Override
     public Value visitInstancePexp(LexLangParser.InstancePexpContext ctx) {
-        String type = ctx.type().getText();
+        LexLangParser.TypeContext typeCtx = ctx.type();
+        int depth = 0;
+        // TODO: understand array to instance multiple (maybe only semantic)
+        while (typeCtx instanceof LexLangParser.ArrayTypeContext) {
+            depth++;
+            typeCtx = ((LexLangParser.ArrayTypeContext) typeCtx).type();
+        }
+        String type = ((LexLangParser.BtypeCallContext) typeCtx).btype().getText();
+        if (ctx.exp() != null) {
+            depth++;
+            int size = visit(ctx.exp()).getInt();
+            return new Value(new ArrayValue(size, type));
+        }
         if (List.of("Int", "Char", "Bool", "Float").contains(type))
             return new Value(null);
         return new Value(new Data(dataTypes.get(type)));

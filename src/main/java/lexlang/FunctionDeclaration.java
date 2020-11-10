@@ -2,15 +2,14 @@ package lexlang;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 // TODO: support overload
 public class FunctionDeclaration {
-    private String id;
+    private final String id;
 
     List<FunctionArgument> arguments = new ArrayList<>();
 
-    List<String> returnTypes = new ArrayList<>();
+    List<LexLangParser.TypeContext> returnTypes = new ArrayList<>();
 
     LexLangParser.FuncCmdsContext commands;
 
@@ -19,16 +18,13 @@ public class FunctionDeclaration {
         if (ctx.params() != null) {
             for (int i = 0; i < ctx.params().ID().size(); i++) {
                 arguments.add(
-                        // TODO: Fix array
                         new FunctionArgument(
                                 ctx.params().ID().get(i).getText(),
-                                ctx.params().type().get(i).getText())
+                                ctx.params().type().get(i))
                 );
             }
         }
-        for (LexLangParser.TypeContext typeContext : ctx.type()) {
-            returnTypes.add(typeContext.getText());
-        }
+        returnTypes.addAll(ctx.type());
         this.commands = ctx.funcCmds();
 
     }
@@ -47,9 +43,9 @@ public class FunctionDeclaration {
 
     public static class FunctionArgument {
         String name;
-        String type;
+        LexLangParser.TypeContext type;
 
-        public FunctionArgument(String name, String type) {
+        public FunctionArgument(String name, LexLangParser.TypeContext type) {
             this.name = name;
             this.type = type;
         }
