@@ -7,7 +7,7 @@ import org.antlr.v4.runtime.tree.RuleNode;
 import java.io.InputStreamReader;
 import java.util.*;
 
-public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
+public class LangInterpreter extends LexLangBaseVisitor<Value> {
 
     FunctionScope memory = new FunctionScope();
 
@@ -18,7 +18,6 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
 
     Boolean returnCalled = false;
     List<Value> returnValues = null; // TODO: Improve function n-tuple usage.
-    ParseTree visiting = null;
 
     /**
      * Run a program
