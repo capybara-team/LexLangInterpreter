@@ -21,6 +21,8 @@ public class LangParser {
                 ParseTree tree = parser.prog();
                 LexLangInterpreter lexLangInterpreter = new LexLangInterpreter();
                 // System.out.println(tree.getText());
+                if (parser.getNumberOfSyntaxErrors() > 0)
+                    System.exit(1);
                 lexLangInterpreter.run(tree);
 
             } else {
