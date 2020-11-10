@@ -4,7 +4,7 @@ public class Value {
     final Object primitive;
 
     public static Value VOID = new Value(null);
-
+    public static Value EMPTY_CHAR = new Value((Character)Character.MIN_VALUE);
 
     public Value(Object value) {
         this.primitive = value;
@@ -27,14 +27,6 @@ public class Value {
 
     public Boolean getBool() {
         return (Boolean) primitive;
-    }
-
-    public boolean isNumber() {
-        return primitive instanceof Number;
-    }
-
-    public boolean isInt() {
-        return primitive instanceof Integer;
     }
 
     public Object getRawValue() {
@@ -68,6 +60,8 @@ public class Value {
 
     @Override
     public String toString() {
+        if (this == EMPTY_CHAR)
+            return "";
         return String.valueOf(primitive);
     }
 }

@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 public class Scope {
     private Scope parent = null;
-    private HashMap<String, Value> memory = new HashMap<>();
+    private final HashMap<String, Value> memory = new HashMap<>();
 
     public Scope() {
     }

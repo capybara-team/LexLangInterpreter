@@ -16,13 +16,13 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
     HashMap<String, FunctionDeclaration> functions = new HashMap<>();
 
     Boolean returnCalled = false;
-    List<Value> returnValues = null; // TODO: Improve function n-uple usage.
+    List<Value> returnValues = null; // TODO: Improve function n-tuple usage.
 
     /**
      * Run a program
      */
-    public Value run(ParseTree prog) {
-        return this.visit(prog);
+    public Value run(ParseTree program) {
+        return this.visit(program);
     }
 
     // Memory management
@@ -48,39 +48,6 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
         this.memory = memory.getParent();
         return v;
     }
-
-    private Value runFunction(String name) {
-        return runFunction(name, null);
-    }
-
-//    private String getVariableName(LexLangParser.IdentifierValueContext id) {
-//        return id.getText();
-//    }
-//
-//    private String getVariableName(LexLangParser.ArrayValueContext id) {
-//        return this.getVariableName(id.lvalue()) + '[' + this.visit(id.exp()).getInt() + ']';
-//    }
-//
-//    private String getVariableName(LexLangParser.ObjectValueContext id) {
-//        return getVariableName(id.lvalue()) + '.' + id.ID().getText();
-//    }
-//
-//    private String getVariableName(LexLangParser.LvalueContext id) {
-//
-//        if (id instanceof LexLangParser.IdentifierValueContext) {
-//            return getVariableName((LexLangParser.IdentifierValueContext) id);
-//        }
-//
-//        if (id instanceof LexLangParser.ArrayValueContext) {
-//            return getVariableName((LexLangParser.ArrayValueContext) id);
-//        }
-//
-//        if (id instanceof LexLangParser.ObjectValueContext) {
-//            return getVariableName((LexLangParser.ObjectValueContext) id);
-//        }
-//
-//        throw new RuntimeException("Unregognized identifier: " + id.getText());
-//    }
 
     private Value resolveVariable(LexLangParser.LvalueContext ctx, Value set) {
         if (ctx instanceof LexLangParser.ObjectValueContext) {
@@ -114,7 +81,7 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
     }
 
     private Value resolveNumber(float result, Value v1) {
-        return resolveNumber(result, v1, new Value((Integer) 0));
+        return resolveNumber(result, v1, new Value(0));
 
     }
 
@@ -125,16 +92,22 @@ public class LexLangInterpreter extends LexLangBaseVisitor<Value> {
 
     // Visitors
 
+
+    // TODO: catch execution error and display line and row
+    @Override
+    public Value visit(ParseTree tree) {
+        return super.visit(tree);
+    }
+
     @Override
     public Value visitProg(LexLangParser.ProgContext ctx) {
         this.visitChildren(ctx);
-        return this.runFunction("main");
+        return this.runFunction("main", null);
     }
 
     // Data
     @Override
     public Value visitData(LexLangParser.DataContext ctx) {
-        String name = ctx.ID().getText();
         DataDeclaration d = new DataDeclaration(ctx);
         dataTypes.put(d.getId(), d);
         return Value.VOID;

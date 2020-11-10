@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DataDeclaration {
-    private String id;
+    private final String id;
 
     List<DataType> types = new ArrayList<>();
 

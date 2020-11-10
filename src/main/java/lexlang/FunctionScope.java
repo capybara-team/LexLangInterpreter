@@ -34,13 +34,11 @@ public class FunctionScope {
         return setVariable(name.getText(), value);
     }
 
-    public FunctionScope pushScope() {
+    public void pushScope() {
         scope = new Scope(scope);
-        return this;
     }
 
-    public FunctionScope popScope() {
+    public void popScope() {
         scope = scope.getParent();
-        return this;
     }
 }

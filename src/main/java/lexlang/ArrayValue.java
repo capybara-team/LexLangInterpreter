@@ -5,18 +5,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ArrayValue {
-    String type = null;
+    String type;
     List<Value> values;
 
     public ArrayValue(int size, String type) {
-        initValues(size);
         this.type = type;
+        initValues(size);
     }
 
     private void initValues(int size) {
         values = new ArrayList<>(size);
+        // TODO: initialize with array;
         for (int i = 0; i < size; i++)
-            values.add(Value.VOID);
+            if (type.equals("Char"))
+                values.add(Value.EMPTY_CHAR);
+            else
+                values.add(Value.VOID);
     }
 
     public Value get(int i) {
@@ -33,7 +37,7 @@ public class ArrayValue {
 
     @Override
     public String toString() {
-        if (type == "Char")
+        if (type.equals("Char"))
             return values.stream().map(Object::toString).collect(Collectors.joining(""));
         return "ArrayValue{" +
                 "type='" + type + '\'' +

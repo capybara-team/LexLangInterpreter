@@ -18,7 +18,7 @@ public class Data {
         return type.getId() + ' ' + values;
     }
 
-    public Value get(Object key) {
+    public Value get(String key) {
         return values.get(key);
     }
 
