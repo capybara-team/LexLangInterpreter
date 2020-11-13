@@ -26,7 +26,7 @@ type: type '[' ']' # arrayType | btype # btypeCall;
 btype: INT | CHAR | BOOL | FLOAT | ID;
 
 cmd:
-	'{' (cmd)* '}'												# closureCmd
+	'{' cmds '}'												# closureCmd
 	| IF '(' exp ')' cmd										# ifCmd
 	| IF '(' exp ')' cmd ELSE cmd								# elseCmd
 	| ITERATE '(' exp ')' cmd									# iterateCmd
@@ -36,6 +36,7 @@ cmd:
 	| lvalue SET exp ';'										# attrCmd
 	| ID '(' (exps)? ')' ('<' lvalue (',' lvalue)* '>')? ';'	# funcCmd
     ;
+cmds: (cmd)*                                                    # multipleCommands;
 exp: exp AND exp # andExp | rexp # rexpCall;
 rexp:
 	aexp LESS_THAN aexp	                    # lessThanRexp

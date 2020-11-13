@@ -48,8 +48,8 @@ public class FunctionDeclaration {
     }
 
     public static class FunctionArgument {
-        String name;
-        LexLangParser.TypeContext type;
+        public String name;
+        public LexLangParser.TypeContext type;
 
         public FunctionArgument(String name, LexLangParser.TypeContext type) {
             this.name = name;

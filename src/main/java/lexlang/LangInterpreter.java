@@ -1,6 +1,6 @@
 /**
- Maxwell Souza 201435009
- Rodolpho Rossete 201435032
+ * Maxwell Souza 201435009
+ * Rodolpho Rossete 201435032
  */
 
 
@@ -92,6 +92,13 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
     private Value resolveNumber(float result, Value v1) {
         return resolveNumber(result, v1, new Value(0));
 
+    }
+
+    private Value visitScopedCommand(ParserRuleContext cmd) {
+        memory.pushScope();
+        Value eval = visit(cmd);
+        memory.popScope();
+        return eval;
     }
 
     @Override
@@ -224,15 +231,11 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
 
     @Override
     public Value visitIterateCmd(LexLangParser.IterateCmdContext ctx) {
-
-        Value partialResult = Value.VOID;
+        Value result = Value.VOID;
         while (visit(ctx.exp()).getBool()) {
-            memory.pushScope();
-            partialResult = visit(ctx.cmd());
-            memory.popScope();
+            result = visitScopedCommand(ctx.cmd());
         }
-
-        return partialResult;
+        return result;
     }
 
 
@@ -241,27 +244,23 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
     @Override
     public Value visitIfCmd(LexLangParser.IfCmdContext ctx) {
         Value result = visit(ctx.exp());
-        if (result.getBool()) {
-            memory.pushScope();
-            result = visit(ctx.cmd());
-            memory.popScope();
-        }
+        if (result.getBool())
+            result = visitScopedCommand(ctx.cmd());
         return result;
     }
 
     @Override
     public Value visitElseCmd(LexLangParser.ElseCmdContext ctx) {
         Value result = visit(ctx.exp());
-        if (result.getBool()) {
-            memory.pushScope();
-            result = visit(ctx.cmd(0));
-            memory.popScope();
-        } else {
-            memory.pushScope();
-            result = visit(ctx.cmd(1));
-            memory.popScope();
-        }
+        if (result.getBool()) result = visitScopedCommand(ctx.cmd(0));
+        else result = visitScopedCommand(ctx.cmd(1));
+
         return result;
+    }
+
+    @Override
+    public Value visitClosureCmd(LexLangParser.ClosureCmdContext ctx) {
+        return visitScopedCommand(ctx.cmds());
     }
 
     // Logic
