@@ -1,6 +1,6 @@
 /**
- Maxwell Souza 201435009
- Rodolpho Rossete 201435032
+ * Maxwell Souza 201435009
+ * Rodolpho Rossete 201435032
  */
 
 
@@ -41,6 +41,10 @@ public class FunctionDeclaration {
 
     public LexLangParser.FuncCmdsContext getCommands() {
         return commands;
+    }
+
+    public List<LexLangParser.TypeContext> getReturnTypes() {
+        return returnTypes;
     }
 
     public String getId() {

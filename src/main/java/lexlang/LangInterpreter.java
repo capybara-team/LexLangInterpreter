@@ -20,10 +20,10 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
     Scanner reader = new Scanner(new InputStreamReader(System.in));
 
     HashMap<String, DataDeclaration> dataTypes = new HashMap<>();
-    HashMap<String, FunctionDeclaration> functions = new HashMap<>();
+    FunctionManager f = new FunctionManager();
 
     Boolean returnCalled = false;
-    List<Value> returnValues = null; // TODO: Improve function n-tuple usage.
+    List<Value> returnValues = null;
 
     /**
      * Run a program
@@ -35,12 +35,8 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
     // Memory management
 
     private Value runFunction(String name, LexLangParser.ExpsContext exps) {
-        if (!functions.containsKey(name))
-            throw new LangException("Function '" + name + "' not found");
-
-
         List<Value> args = new ArrayList<>();
-        FunctionDeclaration func = functions.get(name);
+        FunctionDeclaration func = f.getFunction(name);
 
         if (exps != null)
             for (LexLangParser.ExpContext expContext : exps.exp())
@@ -165,8 +161,7 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
     // functions
     @Override
     public Value visitFunc(LexLangParser.FuncContext ctx) {
-        FunctionDeclaration f = new FunctionDeclaration(ctx);
-        functions.put(f.getId(), f);
+        f.addFunction(ctx);
         return Value.VOID;
     }
 
