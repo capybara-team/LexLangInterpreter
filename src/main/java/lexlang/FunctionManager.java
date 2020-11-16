@@ -11,15 +11,11 @@ public class FunctionManager {
         FunctionDeclaration f = new FunctionDeclaration(ctx);
 
         if (!functions.containsKey(f.getId())) {
-            functions.put(f.getId(), new ArrayList<>() {{
-                add(f);
-            }});
-            return f;
+            functions.put(f.getId(), new ArrayList<>());
         }
-        // TODO: support function overload
-        else throw new LangException("Multiple versions of a function is still not supported. ");
+        functions.get(f.getId()).add(f);
 
-//        return f;
+        return f;
     }
 
     FunctionDeclaration getFunction(String name) {
