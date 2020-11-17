@@ -1,6 +1,6 @@
 /**
- Maxwell Souza 201435009
- Rodolpho Rossete 201435032
+ * Maxwell Souza 201435009
+ * Rodolpho Rossete 201435032
  */
 
 
@@ -10,6 +10,7 @@ package lexlang;
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
+import semantics.SemanticAnalyzer;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,8 +18,16 @@ import java.io.IOException;
 public class LangRunner {
 
     public static void interpreterFile(String path) {
-        LangInterpreter langInterpreter = new LangInterpreter();
-        langInterpreter.run(generateTree(openFile(path)));
+        ParseTree tree = generateTree(openFile(path));
+        SemanticAnalyzer analyzer = analyzeFile(tree);
+        LangInterpreter langInterpreter = new LangInterpreter(analyzer);
+        langInterpreter.run();
+    }
+
+    public static SemanticAnalyzer analyzeFile(ParseTree tree) {
+        SemanticAnalyzer analyzer = new SemanticAnalyzer();
+        analyzer.run(tree);
+        return analyzer;
     }
 
     public static ANTLRFileStream openFile(String path) {

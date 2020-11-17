@@ -21,7 +21,6 @@ public class ArrayValue {
 
     private void initValues(int size) {
         values = new ArrayList<>(size);
-        // TODO: initialize with array;
         for (int i = 0; i < size; i++)
             if (type.equals("Char"))
                 values.add(Value.EMPTY_CHAR);
@@ -30,18 +29,23 @@ public class ArrayValue {
     }
 
     public Value get(int i) {
-        if (values.size() <= i)
-            throw new LangException("Index " + i + " out of bounds for length " + values.size());
+        checkIndexBounds(i);
         return values.get(i);
 
     }
 
     public Value set(int i, Value value) {
+        checkIndexBounds(i);
         return values.set(i, value);
     }
 
     public boolean add(Value value) {
         return values.add(value);
+    }
+
+    private void checkIndexBounds(int i){
+        if (values.size() <= i)
+            throw new LangException("Index " + i + " out of bounds for length " + values.size());
     }
 
     @Override

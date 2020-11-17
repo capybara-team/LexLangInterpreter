@@ -9,39 +9,47 @@ package lexlang;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
+import semantics.SemanticAnalyzer;
 
 import java.io.InputStreamReader;
 import java.util.*;
 
 public class LangInterpreter extends LexLangBaseVisitor<Value> {
 
+    private final HashMap<LexLangParser.ExpsContext, FunctionDeclaration> functionCalls;
     FunctionScope memory = new FunctionScope();
 
     Scanner reader = new Scanner(new InputStreamReader(System.in));
 
     HashMap<String, DataDeclaration> dataTypes = new HashMap<>();
-    FunctionManager f = new FunctionManager();
+    FunctionManager functionManager = new FunctionManager();
 
     Boolean returnCalled = false;
     List<Value> returnValues = null;
 
+    public LangInterpreter(SemanticAnalyzer analyzer) {
+        this.functionManager = analyzer.getFuncManager();
+        this.dataTypes = analyzer.getDataTypes();
+        this.functionCalls = analyzer.getFunctionCalls();
+    }
+
     /**
      * Run a program
      */
-    public Value run(ParseTree program) {
-        return this.visit(program);
+    public Value run() {
+        runFunction("main", null);
+        return null;
     }
 
     // Memory management
 
     private Value runFunction(String name, LexLangParser.ExpsContext exps) {
         List<Value> args = new ArrayList<>();
-        FunctionDeclaration func = f.getFunction(name);
+        FunctionDeclaration func = exps == null ? functionManager.getFunction(name) : functionCalls.get(exps);
 
         if (exps != null)
             for (LexLangParser.ExpContext expContext : exps.exp())
                 args.add(visit(expContext));
-
 
         this.memory = new FunctionScope(memory);
         for (int i = 0; i < func.getArguments().size(); i++)
@@ -58,15 +66,19 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
             String field = rule.ID().getText();
             Value obj = resolveVariable(rule.lvalue());
             if (set != null) return obj.getData().put(field, set);
-            if (!(obj.getRawValue() instanceof Data))
-                throw new LangException("Cannot access property '" + field + "' on non-data value " + rule.getText());
+//            if (!(obj.getRawValue() instanceof Data))
+//                throw new LangException("Cannot access property '" + field + "' on non-data value " + rule.getText());
             return obj.getData().get(field);
         }
         if (ctx instanceof LexLangParser.ArrayValueContext) {
             LexLangParser.ArrayValueContext rule = ((LexLangParser.ArrayValueContext) ctx);
             int i = visit(rule.exp()).getInt();
             Value arr = resolveVariable(rule.lvalue());
-            if (set != null) return arr.getArray().set(i, set);
+            if (set != null)
+                if (arr.getArray() == null)
+                    throw new LangException("NullPointer exception: cannot set on index " + i + " on value " + arr);
+                else
+                    return arr.getArray().set(i, set);
             return arr.getArray().get(i);
         }
         LexLangParser.IdentifierValueContext rule = (LexLangParser.IdentifierValueContext) ctx;
@@ -105,7 +117,6 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
     // Visitors
 
 
-    // TODO: catch execution error and display line and row
     @Override
     public Value visit(ParseTree tree) {
         try {
@@ -113,34 +124,30 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
         } catch (LangException e) {
             if (!(tree instanceof ParserRuleContext)) throw e;
 
-            System.err.println("Line " +
-                    ((ParserRuleContext) tree).getStart().getLine() + ':' +
-                    ((ParserRuleContext) tree).getStart().getCharPositionInLine() + ' ' +
-                    e.getMessage());
+            System.err.println(e.getMessage((ParserRuleContext) tree));
             System.exit(1);
             return null;
         }
     }
 
-    @Override
-    public Value visitProg(LexLangParser.ProgContext ctx) {
-        this.visitChildren(ctx);
-        return this.runFunction("main", null);
-    }
+//    @Override
+//    public Value visitProg(LexLangParser.ProgContext ctx) {
+//        this.visitChildren(ctx);
+//        return this.runFunction("main", null);
+//    }
 
     // Data
-    @Override
-    public Value visitData(LexLangParser.DataContext ctx) {
-        DataDeclaration d = new DataDeclaration(ctx);
-        dataTypes.put(d.getId(), d);
-        return Value.VOID;
-    }
+//    @Override
+//    public Value visitData(LexLangParser.DataContext ctx) {
+//        DataDeclaration d = new DataDeclaration(ctx);
+//        dataTypes.put(d.getId(), d);
+//        return Value.VOID;
+//    }
 
     @Override
     public Value visitInstancePexp(LexLangParser.InstancePexpContext ctx) {
         LexLangParser.TypeContext typeCtx = ctx.type();
         int depth = 0;
-        // TODO: understand array to instance multiple (maybe only semantic)
         while (typeCtx instanceof LexLangParser.ArrayTypeContext) {
             depth++;
             typeCtx = ((LexLangParser.ArrayTypeContext) typeCtx).type();
@@ -153,17 +160,17 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
         }
         if (List.of("Int", "Char", "Bool", "Float").contains(type))
             return new Value(null);
-        if (!dataTypes.containsKey(type))
-            throw new LangException("Data '" + type + "' not found");
+//        if (!dataTypes.containsKey(type))
+//            throw new LangException("Data '" + type + "' not found");
         return new Value(new Data(dataTypes.get(type)));
     }
 
     // functions
-    @Override
-    public Value visitFunc(LexLangParser.FuncContext ctx) {
-        f.addFunction(ctx);
-        return Value.VOID;
-    }
+//    @Override
+//    public Value visitFunc(LexLangParser.FuncContext ctx) {
+//        functionManager.addFunction(ctx);
+//        return Value.VOID;
+//    }
 
     @Override
     public Value visitFuncCmd(LexLangParser.FuncCmdContext ctx) {
@@ -182,13 +189,13 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
         Value result = runFunction(name, ctx.exps());
         if (ctx.exp() != null) {
             int i = visit(ctx.exp()).getInt();
-            if (returnValues == null)
-                throw new LangException("Function '" + name +
-                        "' doesn't returns arguments, tried to access argument [" + i + ']');
-            if (i >= returnValues.size())
-                throw new LangException("Function '" + name +
-                        "' only returns " + returnValues.size() +
-                        " arguments, tried to access argument [" + i + ']');
+//            if (returnValues == null)
+//                throw new LangException("Function '" + name +
+//                        "' doesn't returns arguments, tried to access argument [" + i + ']');
+//            if (i >= returnValues.size())
+//                throw new LangException("Function '" + name +
+//                        "' only returns " + returnValues.size() +
+//                        " arguments, tried to access argument [" + i + ']');
             result = returnValues.get(i);
         }
         returnValues = null;
@@ -217,17 +224,13 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
         return resolveVariable(ctx.lvalue());
     }
 
-    @Override
-    public Value visitIdentifierValue(LexLangParser.IdentifierValueContext ctx) {
-        return super.visitIdentifierValue(ctx);
-    }
-
     // while
 
     @Override
     public Value visitIterateCmd(LexLangParser.IterateCmdContext ctx) {
         Value result = Value.VOID;
-        while (visit(ctx.exp()).getBool()) {
+        int count = visit(ctx.exp()).getInt();
+        for (int i = 0; i < count; i++){
             result = visitScopedCommand(ctx.cmd());
         }
         return result;
@@ -305,12 +308,10 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
                 return resolveNumber(v1.getFloat() / v2.getFloat(), v1, v2);
             case LexLangParser.MOD:
                 return resolveNumber(v1.getFloat() % v2.getFloat(), v1, v2);
-            default:
-                throw new LangException("unknown operator: " + ctx.op.getText());
         }
+        return null;
     }
 
-    // TODO: check if any value can be negated (strings, numbers)
     @Override
     public Value visitNotSexp(LexLangParser.NotSexpContext ctx) {
         Value value = this.visit(ctx.sexp());
@@ -387,7 +388,7 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
     @Override
     public Value visitReadCmd(LexLangParser.ReadCmdContext ctx) {
         String response = reader.nextLine();
-        return resolveVariable(ctx.lvalue(), new Value(Float.valueOf(response)));
+        return resolveVariable(ctx.lvalue(), new Value(Integer.valueOf(response)));
     }
 
     // debugging

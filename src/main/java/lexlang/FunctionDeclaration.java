@@ -6,10 +6,12 @@
 
 package lexlang;
 
+import semantics.Type;
+
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: support overload
+// TODO: store return types and arguments as Type instances
 public class FunctionDeclaration {
     private final String id;
 
