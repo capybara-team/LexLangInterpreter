@@ -6,6 +6,8 @@
 
 package lexlang;
 
+import semantics.DataDeclaration;
+
 import java.util.HashMap;
 
 public class Data {

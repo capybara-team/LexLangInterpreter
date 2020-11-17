@@ -9,7 +9,7 @@ package lexlang;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
-import semantics.SemanticAnalyzer;
+import semantics.*;
 
 import java.io.InputStreamReader;
 import java.util.*;

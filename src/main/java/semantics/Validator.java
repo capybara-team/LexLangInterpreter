@@ -1,7 +1,5 @@
 package semantics;
 
-import lexlang.LangException;
-
 public class Validator {
     static Type INT = new Type(DefaultTypes.Int);
     static Type FLOAT = new Type(DefaultTypes.Float);

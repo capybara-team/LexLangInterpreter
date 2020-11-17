@@ -1,6 +1,7 @@
-package lexlang;
+package semantics;
 
-import semantics.Type;
+import lexlang.LexLangParser;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

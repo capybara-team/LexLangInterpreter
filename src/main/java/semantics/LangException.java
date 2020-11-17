@@ -4,7 +4,7 @@
  */
 
 
-package lexlang;
+package semantics;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 

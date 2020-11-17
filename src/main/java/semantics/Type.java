@@ -6,7 +6,6 @@
 
 package semantics;
 
-import lexlang.DataDeclaration;
 import lexlang.Value;
 
 import java.util.Objects;

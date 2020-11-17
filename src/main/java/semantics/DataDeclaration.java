@@ -4,7 +4,9 @@
  */
 
 
-package lexlang;
+package semantics;
+
+import lexlang.LexLangParser;
 
 import java.util.ArrayList;
 import java.util.List;
