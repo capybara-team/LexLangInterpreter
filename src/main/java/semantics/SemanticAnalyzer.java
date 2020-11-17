@@ -226,6 +226,9 @@ public class SemanticAnalyzer extends LexLangBaseVisitor<Value> {
     public Value visitFuncCmd(LexLangParser.FuncCmdContext ctx) {
         String name = ctx.ID().getText();
         FunctionDeclaration f = resolveFunction(name, ctx.exps());
+        if (ctx.lvalue().size() > f.getReturnTypes().size())
+            throw new LangException("Function '" + f.getId() + "' return only " + f.getReturnTypes().size() + " values. Trying to get " + ctx.lvalue().size(), ctx);
+
         for (int i = 0; i < ctx.lvalue().size(); i++) {
             resolveVariable(ctx.lvalue(i), resolveType(f.getReturnTypes().get(i)));
         }

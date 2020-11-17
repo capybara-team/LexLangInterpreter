@@ -28,7 +28,7 @@ public class Validator {
     static void canSet(Type prop, Type value) {
         if (!prop.equals(value))
             throw new LangException(
-                    "Cannot set value: Expected '" + prop + "', found '" + value + "'"
+                    "Cannot set value: Expected '" + prop + "', received '" + value + "'"
             );
     }
 
@@ -39,6 +39,6 @@ public class Validator {
         if (data.isArray())
             throw new LangException(prefix + " of array of data '" + data + "'");
         if (data.getDataType().getType(prop) == null)
-            throw new LangException("Data " + data + " doesn't have property '" + prop + "'");
+            throw new LangException(", Data " + data + " doesn't have the property '" + prop + "'");
     }
 }
