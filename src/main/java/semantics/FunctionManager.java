@@ -19,6 +19,22 @@ public class FunctionManager {
         if (!functions.containsKey(f.getId())) {
             functions.put(f.getId(), new ArrayList<>());
         }
+        List<FunctionDeclaration> functionList = functions.get(f.getId());
+
+        for (FunctionDeclaration declaration : functionList) {
+            if (declaration.getArguments().size() != f.getArguments().size()) continue;
+            boolean error = true;
+            for (int i = 0; i < declaration.getArguments().size(); i++) {
+                if (!declaration.getArguments().get(i).type.getText().equals(f.getArguments().get(i).type.getText())) {
+                    error = false;
+                    break;
+                }
+            }
+            if (error)
+                throw new LangException("Function '" + f.getId() + "' already has been declared with the same signature", ctx);
+
+        }
+
         functions.get(f.getId()).add(f);
 
         return f;
