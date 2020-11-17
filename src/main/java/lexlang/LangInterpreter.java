@@ -230,7 +230,7 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
     public Value visitIterateCmd(LexLangParser.IterateCmdContext ctx) {
         Value result = Value.VOID;
         int count = visit(ctx.exp()).getInt();
-        for (int i = 0; i < count; i++){
+        for (int i = 0; i < count; i++) {
             result = visitScopedCommand(ctx.cmd());
         }
         return result;
@@ -388,7 +388,13 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
     @Override
     public Value visitReadCmd(LexLangParser.ReadCmdContext ctx) {
         String response = reader.nextLine();
-        return resolveVariable(ctx.lvalue(), new Value(Integer.valueOf(response)));
+        int val;
+        try {
+            val = Integer.valueOf(response);
+        } catch (Exception e) {
+            throw new LangException("Read error: 'Int' expected, received '" + response + "'", ctx);
+        }
+        return resolveVariable(ctx.lvalue(), new Value(val));
     }
 
     // debugging
