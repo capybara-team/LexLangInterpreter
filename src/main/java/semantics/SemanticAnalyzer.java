@@ -227,7 +227,7 @@ public class SemanticAnalyzer extends LexLangBaseVisitor<Value> {
         String name = ctx.ID().getText();
         FunctionDeclaration f = resolveFunction(name, ctx.exps());
         if (ctx.lvalue().size() > f.getReturnTypes().size())
-            throw new LangException("Function '" + f.getId() + "' return only " + f.getReturnTypes().size() + " values. Trying to get " + ctx.lvalue().size(), ctx);
+            throw new LangException("Function '" + f.getId() + "' only returns " + f.getReturnTypes().size() + " values. Trying to get " + ctx.lvalue().size(), ctx);
 
         for (int i = 0; i < ctx.lvalue().size(); i++) {
             resolveVariable(ctx.lvalue(i), resolveType(f.getReturnTypes().get(i)));
@@ -248,8 +248,13 @@ public class SemanticAnalyzer extends LexLangBaseVisitor<Value> {
         try {
             returnIndex = Integer.parseInt(ctx.exp().getText());
         } catch (Exception e) {
-            throw new LangException("Function return access should be a literal 'Int'. Found '" + ctx.exp().getText() + "'", ctx);
+            throw new LangException("Function return access should be a literal 'Int'. Found expression '" + ctx.exp().getText() + "'", ctx);
         }
+
+        if (returnIndex >= f.getReturnTypes().size())
+            throw new LangException("Function '" + f.getId() + "' only returns " + f.getReturnTypes().size() + " values. Trying to access index " + returnIndex, ctx);
+
+
         return resolveType(f.getReturnTypes().get(returnIndex));
     }
 
@@ -340,7 +345,7 @@ public class SemanticAnalyzer extends LexLangBaseVisitor<Value> {
 
     @Override
     public Value visitAddAexp(LexLangParser.AddAexpContext ctx) {
-        Type v1 = (Type) this.visit(ctx.aexp()), v2 = (Type) this.visit(ctx.aexp());
+        Type v1 = (Type) this.visit(ctx.aexp()), v2 = (Type) this.visit(ctx.mexp());
         Validator.isNumber(v1);
         Validator.compareTypes(v1, v2);
         return v1;

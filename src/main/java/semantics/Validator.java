@@ -22,7 +22,7 @@ public class Validator {
 
     static void compareTypes(Type t1, Type t2) {
         if (!t1.equals(t2))
-            throw new LangException("Both values should be the same type. Received '" + t1 + "' and '" + t2 + "'");
+            throw new LangException("Both values should be the same type. Operation mixed '" + t1 + "' and '" + t2 + "'");
     }
 
     static void canSet(Type prop, Type value) {
