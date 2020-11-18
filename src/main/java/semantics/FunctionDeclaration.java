@@ -62,5 +62,15 @@ public class FunctionDeclaration {
             this.name = name;
             this.type = type;
         }
+
+        @Override
+        public String toString() {
+            return name + " :: " + type.getText();
+        }
+    }
+
+    @Override
+    public String toString() {
+        return id + arguments;
     }
 }

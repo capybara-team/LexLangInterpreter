@@ -1,6 +1,6 @@
-/**
- * Maxwell Souza 201435009
- * Rodolpho Rossete 201435032
+/*
+  Maxwell Souza 201435009
+  Rodolpho Rossete 201435032
  */
 
 
@@ -37,8 +37,8 @@ public class SemanticAnalyzer extends LexLangBaseVisitor<Value> {
     /**
      * Run a program
      */
-    public Value run(ParseTree program) {
-        return this.visit(program);
+    public void run(ParseTree program) {
+        this.visit(program);
     }
 
     // Memory management
@@ -175,10 +175,28 @@ public class SemanticAnalyzer extends LexLangBaseVisitor<Value> {
                 this.currentFunction = function;
                 memory.pushScope();
                 for (FunctionDeclaration.FunctionArgument argument : function.getArguments())
-                    memory.setVariable(argument.name, resolveType(argument.type));
+                    if (memory.getVariable(argument.name) != null)
+                        throw new LangException("Function '" + function + "' has multiple arguments '" + argument.name + "'", function.getCommands().getParent());
+                    else
+                        memory.setVariable(argument.name, resolveType(argument.type));
+
 
                 visit(function.getCommands());
                 memory.popScope();
+
+                // return validation
+                if (function.getReturnTypes().size() > 0) {
+                    boolean hasReturn = false;
+                    for (LexLangParser.CmdContext context : function.getCommands().cmd()) {
+                        if (context instanceof LexLangParser.ReturnCmdContext) {
+                            hasReturn = true;
+                            break;
+                        }
+                    }
+                    if (!hasReturn)
+                        throw new LangException("Function '" + function + "' should have at least 1 return statement at root.", function.getCommands());
+                }
+
                 this.currentFunction = null;
             }
 

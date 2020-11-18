@@ -21,8 +21,8 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
 
     Scanner reader = new Scanner(new InputStreamReader(System.in));
 
-    HashMap<String, DataDeclaration> dataTypes = new HashMap<>();
-    FunctionManager functionManager = new FunctionManager();
+    HashMap<String, DataDeclaration> dataTypes;
+    FunctionManager functionManager;
 
     Boolean returnCalled = false;
     List<Value> returnValues = null;
@@ -147,14 +147,11 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
     @Override
     public Value visitInstancePexp(LexLangParser.InstancePexpContext ctx) {
         LexLangParser.TypeContext typeCtx = ctx.type();
-        int depth = 0;
-        while (typeCtx instanceof LexLangParser.ArrayTypeContext) {
-            depth++;
+        while (typeCtx instanceof LexLangParser.ArrayTypeContext)
             typeCtx = ((LexLangParser.ArrayTypeContext) typeCtx).type();
-        }
+
         String type = ((LexLangParser.BtypeCallContext) typeCtx).btype().getText();
         if (ctx.exp() != null) {
-            depth++;
             int size = visit(ctx.exp()).getInt();
             return new Value(new ArrayValue(size, type));
         }
