@@ -201,6 +201,8 @@ public class SemanticAnalyzer extends LexLangBaseVisitor<Value> {
     @Override
     public Value visitData(LexLangParser.DataContext ctx) {
         DataDeclaration d = new DataDeclaration(ctx);
+        if (dataTypes.containsKey(d.getId()))
+            throw new LangException("Data '" + d.getId() + "' was already declared", ctx);
         dataTypes.put(d.getId(), d);
         return null;
     }
