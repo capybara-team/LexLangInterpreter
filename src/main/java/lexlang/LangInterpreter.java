@@ -1,6 +1,6 @@
-/**
- * Maxwell Souza 201435009
- * Rodolpho Rossete 201435032
+/*
+  Maxwell Souza 201435009
+  Rodolpho Rossete 201435032
  */
 
 
@@ -36,9 +36,8 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
     /**
      * Run a program
      */
-    public Value run() {
+    public void run() {
         runFunction("main", null);
-        return null;
     }
 
     // Memory management
@@ -387,7 +386,7 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
         String response = reader.nextLine();
         int val;
         try {
-            val = Integer.valueOf(response);
+            val = Integer.parseInt(response);
         } catch (Exception e) {
             throw new LangException("Read error: 'Int' expected, received '" + response + "'", ctx);
         }

@@ -1,8 +1,7 @@
-/**
+/*
  Maxwell Souza 201435009
  Rodolpho Rossete 201435032
  */
-
 
 
 package lexlang;
@@ -11,7 +10,7 @@ public class Value {
     final Object primitive;
 
     public static Value VOID = new Value(null);
-    public static Value EMPTY_CHAR = new Value((Character)Character.MIN_VALUE);
+    public static Value EMPTY_CHAR = new Value(Character.MIN_VALUE);
 
     public Value(Object value) {
         this.primitive = value;
@@ -44,14 +43,15 @@ public class Value {
         return (Data) primitive;
     }
 
-    public ArrayValue getArray(){
+    public ArrayValue getArray() {
         return (ArrayValue) primitive;
     }
 
     @Override
     public boolean equals(Object o) {
         if (primitive == o) return true;
-//      if (value == null || o == null || o.getClass() != value.getClass()) return false;
+        // if (value == null || o == null || o.getClass() != value.getClass()) return false;
+        if (!(o instanceof Value)) return false;
         Value comparedValue = (Value) o;
         if (comparedValue.getRawValue() instanceof Number && this.primitive instanceof Number)
             return this.getFloat().equals(comparedValue.getFloat());

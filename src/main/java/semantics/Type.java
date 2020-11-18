@@ -76,9 +76,9 @@ public class Type extends Value {
 
     @Override
     public String toString() {
-        String arrayDepth = "";
-        for (int i = 0; i < depth; i++) arrayDepth += "[]";
+        StringBuilder arrayDepth = new StringBuilder();
+        for (int i = 0; i < depth; i++) arrayDepth.append("[]");
         if (isData()) return data.getId() + arrayDepth;
-        return type + arrayDepth;
+        return type + arrayDepth.toString();
     }
 }

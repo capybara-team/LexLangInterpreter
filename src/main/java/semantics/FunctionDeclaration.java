@@ -1,13 +1,12 @@
-/**
- * Maxwell Souza 201435009
- * Rodolpho Rossete 201435032
+/*
+  Maxwell Souza 201435009
+  Rodolpho Rossete 201435032
  */
 
 
 package semantics;
 
 import lexlang.LexLangParser;
-import semantics.Type;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-/**
+/*
  Maxwell Souza 201435009
  Rodolpho Rossete 201435032
  */
@@ -45,7 +45,7 @@ public class ArrayValue {
         return values.add(value);
     }
 
-    private void checkIndexBounds(int i){
+    private void checkIndexBounds(int i) {
         if (values.size() <= i)
             throw new LangException("Index " + i + " out of bounds for length " + values.size());
     }
