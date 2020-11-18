@@ -1,6 +1,6 @@
-/**
- * Maxwell Souza 201435009
- * Rodolpho Rossete 201435032
+/*
+  Maxwell Souza 201435009
+  Rodolpho Rossete 201435032
  */
 
 
@@ -26,6 +26,14 @@ public class Type extends Value {
         this.depth = depth;
     }
 
+    public Type(DefaultTypes type, int depth, DataDeclaration data) {
+        super(null);
+        this.type = type;
+        this.depth = depth;
+        this.data = data;
+
+    }
+
     public DefaultTypes getType() {
         return type;
     }
@@ -40,18 +48,6 @@ public class Type extends Value {
 
     public DataDeclaration getDataType() {
         return data;
-    }
-
-    public Type(DefaultTypes type, int depth, DataDeclaration data) {
-        super(null);
-        this.type = type;
-        this.depth = depth;
-        this.data = data;
-
-    }
-
-    public DefaultTypes get() {
-        return type;
     }
 
     public boolean isArray() {
@@ -83,6 +79,6 @@ public class Type extends Value {
         String arrayDepth = "";
         for (int i = 0; i < depth; i++) arrayDepth += "[]";
         if (isData()) return data.getId() + arrayDepth;
-        return String.valueOf(type) + arrayDepth;
+        return type + arrayDepth;
     }
 }
