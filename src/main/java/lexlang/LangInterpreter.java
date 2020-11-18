@@ -25,7 +25,6 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
     FunctionManager functionManager;
 
     Boolean returnCalled = false;
-    List<Value> returnValues = null;
 
     public LangInterpreter(SemanticAnalyzer analyzer) {
         this.functionManager = analyzer.getFuncManager();
@@ -156,56 +155,45 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
         }
         if (List.of("Int", "Char", "Bool", "Float").contains(type))
             return new Value(null);
-//        if (!dataTypes.containsKey(type))
-//            throw new LangException("Data '" + type + "' not found");
         return new Value(new Data(dataTypes.get(type)));
     }
 
     // functions
-//    @Override
-//    public Value visitFunc(LexLangParser.FuncContext ctx) {
-//        functionManager.addFunction(ctx);
-//        return Value.VOID;
-//    }
 
     @Override
     public Value visitFuncCmd(LexLangParser.FuncCmdContext ctx) {
         String name = ctx.ID().getText();
-        Value ret = runFunction(name, ctx.exps());
-        for (int i = 0; i < ctx.lvalue().size(); i++) {
-            resolveVariable(ctx.lvalue(i), returnValues.get(i));
+        Value returnValue = runFunction(name, ctx.exps());
+        if(ctx.lvalue().size() > 0) {
+            ArrayList<Value> returnList = (ArrayList<Value>) returnValue.getPrimitive();
+            for (int i = 0; i < ctx.lvalue().size(); i++)
+                resolveVariable(ctx.lvalue(i), returnList.get(i));
         }
-        returnValues = null;
-        return ret;
+        return returnValue;
     }
 
     @Override
     public Value visitFuncCallPexp(LexLangParser.FuncCallPexpContext ctx) {
         String name = ctx.ID().getText();
-        Value result = runFunction(name, ctx.exps());
+        Value returnValue = runFunction(name, ctx.exps());
+        ArrayList<Value> returnList = (ArrayList<Value>) returnValue.getPrimitive();
         if (ctx.exp() != null) {
             int i = visit(ctx.exp()).getInt();
-//            if (returnValues == null)
-//                throw new LangException("Function '" + name +
-//                        "' doesn't returns arguments, tried to access argument [" + i + ']');
-//            if (i >= returnValues.size())
-//                throw new LangException("Function '" + name +
-//                        "' only returns " + returnValues.size() +
-//                        " arguments, tried to access argument [" + i + ']');
-            result = returnValues.get(i);
+            returnValue = returnList.get(i);
         }
-        returnValues = null;
-        return result;
+        else returnValue = returnList.get(0);
+        return returnValue;
     }
 
     @Override
     public Value visitReturnCmd(LexLangParser.ReturnCmdContext ctx) {
-        this.returnValues = new ArrayList<>();
+        ArrayList<Value> ret = new ArrayList<Value>();
         for (LexLangParser.ExpContext expContext : ctx.exp()) {
-            this.returnValues.add(visit(expContext));
+            ret.add(visit(expContext));
+
         }
         this.returnCalled = true;
-        return this.returnValues.get(0);
+        return new Value(ret);
     }
 
     // variables
@@ -386,7 +374,7 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
         String response = reader.nextLine();
         int val;
         try {
-            val = Integer.parseInt(response);
+            val = Integer.valueOf(response);
         } catch (Exception e) {
             throw new LangException("Read error: 'Int' expected, received '" + response + "'", ctx);
         }

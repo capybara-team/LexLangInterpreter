@@ -47,6 +47,10 @@ public class Value {
         return (ArrayValue) primitive;
     }
 
+    public Object getPrimitive() {
+        return primitive;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (primitive == o) return true;
