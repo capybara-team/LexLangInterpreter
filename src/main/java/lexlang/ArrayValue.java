@@ -54,9 +54,6 @@ public class ArrayValue {
     public String toString() {
         if (type.equals("Char"))
             return values.stream().map(Object::toString).collect(Collectors.joining(""));
-        return "ArrayValue{" +
-                "type='" + type + '\'' +
-                ", values=" + values +
-                '}';
+        return type  + ": " + values;
     }
 }
