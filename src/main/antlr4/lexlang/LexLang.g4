@@ -11,6 +11,8 @@ fragment CHAR_TYPES: // possible digits
 	~('\\')
 	| '\\n'
 	| '\\t'
+	| '\\b'
+	| '\\r'
 	| '\\\\'
 	| '\\\''
     ;

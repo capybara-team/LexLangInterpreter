@@ -349,6 +349,12 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
             case "\\t":
                 letter = "\t";
                 break;
+            case "\\b":
+                letter = "\b";
+                break;
+            case "\r":
+                letter = "\r";
+                break;
             case "\\\\":
                 letter = "\\";
                 break;
