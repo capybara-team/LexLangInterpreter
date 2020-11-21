@@ -21,6 +21,11 @@ public class SemanticAnalyzer extends LexLangBaseVisitor<Value> {
     FunctionManager funcManager = new FunctionManager();
     HashMap<LexLangParser.ExpsContext, FunctionDeclaration> functionCalls = new HashMap<>();
     FunctionDeclaration currentFunction = null;
+    HashMap<ParserRuleContext, Scope> variablesDeclared = new HashMap<ParserRuleContext, Scope>();
+
+    public HashMap<ParserRuleContext, Scope> getVariablesDeclared() {
+        return variablesDeclared;
+    }
 
     public HashMap<String, DataDeclaration> getDataTypes() {
         return dataTypes;
@@ -144,9 +149,11 @@ public class SemanticAnalyzer extends LexLangBaseVisitor<Value> {
 
 
     private Value visitScopedCommand(ParserRuleContext cmd) {
-        memory.pushScope();
+        Scope scope = memory.pushScope();
         Value eval = visit(cmd);
         memory.popScope();
+        variablesDeclared.put(cmd, scope);
+
         return eval;
     }
 
@@ -173,7 +180,7 @@ public class SemanticAnalyzer extends LexLangBaseVisitor<Value> {
         for (String key : funcManager.getFunctions().keySet())
             for (FunctionDeclaration function : funcManager.getFunctions(key)) {
                 this.currentFunction = function;
-                memory.pushScope();
+                Scope scope = memory.pushScope();
                 for (FunctionDeclaration.FunctionArgument argument : function.getArguments())
                     if (memory.getVariable(argument.name) != null)
                         throw new LangException("Function '" + function + "' has multiple arguments '" + argument.name + "'", function.getCommands().getParent());
@@ -183,6 +190,7 @@ public class SemanticAnalyzer extends LexLangBaseVisitor<Value> {
 
                 visit(function.getCommands());
                 memory.popScope();
+                variablesDeclared.put(ctx, scope);
 
                 // return validation
                 if (function.getReturnTypes().size() > 0) {

@@ -40,11 +40,11 @@ public class FunctionScope {
         return setVariable(name.getText(), value);
     }
 
-    public void pushScope() {
-        scope = new Scope(scope);
+    public Scope pushScope() {
+        return scope = new Scope(scope);
     }
 
-    public void popScope() {
-        scope = scope.getParent();
+    public Scope popScope() {
+        return scope = scope.getParent();
     }
 }
