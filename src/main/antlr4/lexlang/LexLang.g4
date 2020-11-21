@@ -99,7 +99,7 @@ TRUE: 'true';
 FALSE: 'false';
 
 /* identifiers */
-ID: [a-zA-Z][a-zA-Z0-9]*;
+ID: [a-zA-Z][a-zA-Z0-9_]*;
 
 /* literals */
 INT_NUM: '0' | [1-9][0-9]*;
