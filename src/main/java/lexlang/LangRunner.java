@@ -18,7 +18,6 @@ import semantics.SemanticAnalyzer;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Path;
 
 public class LangRunner {
 
@@ -28,6 +27,17 @@ public class LangRunner {
         SemanticAnalyzer analyzer = analyzeFile(tree);
         LangInterpreter langInterpreter = new LangInterpreter(analyzer);
         langInterpreter.run();
+    }
+
+    public static void genereteJavaCode(String langPath) {
+        ParseTree tree = generateTree(openFile(langPath));
+        SemanticAnalyzer analyzer = analyzeFile(tree);
+        STGroup group = new STGroupFile("src/main/templates/java.stg");
+        CodeGenerator codeGenerator = new CodeGenerator(analyzer, group);
+        String javaCode = codeGenerator.run();
+        System.out.println(javaCode);
+//        createJavaCodeFile(javaCode, getFileWithoutExtension(langPath) + ".java");
+
     }
 
     public static SemanticAnalyzer analyzeFile(ParseTree tree) {
@@ -59,17 +69,6 @@ public class LangRunner {
         if (parser.getNumberOfSyntaxErrors() > 0)
             System.exit(1);
         return tree;
-    }
-
-    public static void genereteJavaCode(String langPath, String javaPath){
-
-        ParseTree tree = generateTree(openFile(langPath));
-        SemanticAnalyzer analyzer = analyzeFile(tree);
-        STGroup group = new STGroupFile("./template/java.stg");
-        CodeGenerator codeGenerator = new CodeGenerator(analyzer,group,getFileWithoutExtension(langPath));
-        String javaCode = codeGenerator.run();
-        createJavaCodeFile(javaCode, javaPath);
-
     }
 
     private static void createJavaCodeFile(String javaCode, String javaPath) {

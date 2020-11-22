@@ -25,7 +25,7 @@ func: ID '(' params? ')' (':' type (',' type)*)? '{' funcCmds '}';
 funcCmds: (cmd)*;
 params: ID '::' type (',' ID '::' type)*;
 type: type '[' ']' # arrayType | btype # btypeCall;
-btype: INT | CHAR | BOOL | FLOAT | ID;
+btype: typeName=(INT | CHAR | BOOL | FLOAT | ID);
 
 cmd:
 	'{' cmds '}'												# closureCmd

@@ -1,0 +1,84 @@
+group java;
+
+program(data, funcs) ::= <<
+<data; separator="\n\n">
+
+public class Main {
+    <funcs; separator="\n\n">
+
+    public static void main(String args[]) {
+        main();
+    }
+}
+>>
+
+data(name, decl) ::= <<
+class <name> {
+    <decl; separator="\n">
+}
+>>
+
+decl(id, type) ::= "public <type> <id>;"
+
+func(type, name, params, decl, stmt) ::= <<
+static <type> <name>(<params; separator=", ">) {
+    <if(decl)><decl; separator=";\n">;<endif>
+    <stmt>
+}
+>>
+
+param(type, name) ::= "<type> <name>"
+
+array_type(type) ::= "<type>[]"
+int_type() ::= "int"
+float_type() ::= "float"
+boolean_type() ::= "boolean"
+
+print(expr) ::= "System.out.println(<expr>);"
+return(expr) ::= "return <expr>;"
+
+while(expr, stmt) ::= <<
+while(<expr>) {
+    <stmt>
+}
+>>
+
+if(expr, thn, els) ::= <<
+if(<expr>) {
+    <thn>
+} <if(els)>else {
+    <els>
+}
+<endif>
+>>
+
+stmt_list(stmt1, stmt2) ::= <<
+<stmt1>
+<stmt2>
+>>
+
+attr(var, expr) ::= "<var> = <expr>;"
+lvalue(name, array) ::= "<name><array>"
+array_access(expr) ::= "[<expr>]"
+
+boolean_expr(value) ::= "<value>"
+float_expr(value) ::= "<value>"
+int_expr(value) ::= "<value>"
+
+new_array(var, type, expr) ::= "<var> = new <type>[<expr>];"
+
+call(name, args) ::= <<<name>(<args; separator=", ">)>>
+
+mul_expr(left_expr, right_expr) ::= "(<left_expr> * <right_expr>)"
+div_expr(left_expr, right_expr) ::= "(<left_expr> / <right_expr>)"
+mod_expr(left_expr, right_expr) ::= "(<left_expr> % <right_expr>)"
+add_expr(left_expr, right_expr) ::= "(<left_expr> + <right_expr>)"
+sub_expr(left_expr, right_expr) ::= "(<left_expr> - <right_expr>)"
+
+lt_expr(left_expr, right_expr) ::= "(<left_expr> \< <right_expr>)"
+equals_expr(left_expr, right_expr) ::= "(<left_expr> == <right_expr>)"
+and_expr(left_expr, right_expr) ::= "(<left_expr> && <right_expr>)"
+not_expr(expr) ::= "!<expr>"
+
+
+literal(value) ::= "<value>"

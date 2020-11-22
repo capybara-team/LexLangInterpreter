@@ -6,14 +6,17 @@
 
 package generator;
 
-import lexlang.*;
+import lexlang.FunctionScope;
+import lexlang.LexLangBaseVisitor;
+import lexlang.LexLangParser;
+import lexlang.Scope;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.RuleNode;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
-import org.stringtemplate.v4.STGroupFile;
-import semantics.*;
+import semantics.DataDeclaration;
+import semantics.FunctionDeclaration;
+import semantics.FunctionManager;
+import semantics.SemanticAnalyzer;
 
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -21,13 +24,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
-public class CodeGenerator extends LexLangBaseVisitor<Value> {
+public class CodeGenerator extends LexLangBaseVisitor<Template> {
+
 
     private final HashMap<LexLangParser.ExpsContext, FunctionDeclaration> functionCalls;
     private final HashMap<ParserRuleContext, Scope> variablesDeclared;
     FunctionScope memory = new FunctionScope();
 
-    STGroupFile langTemplates;
     STGroup groupTemplate;
 
     Scanner reader = new Scanner(new InputStreamReader(System.in));
@@ -37,27 +40,68 @@ public class CodeGenerator extends LexLangBaseVisitor<Value> {
 
     Boolean returnCalled = false;
 
-    String fileName;
-
-    public CodeGenerator(SemanticAnalyzer analyzer, STGroup groupTemplate, String fileName) {
+    public CodeGenerator(SemanticAnalyzer analyzer, STGroup groupTemplate) {
         this.groupTemplate = groupTemplate;
 
         this.functionManager = analyzer.getFuncManager();
         this.dataTypes = analyzer.getDataTypes();
         this.functionCalls = analyzer.getFunctionCalls();
         this.variablesDeclared = analyzer.getVariablesDeclared();
-        this.fileName = fileName;
     }
 
 
     //TODO Aqui deve inicializar a geraçao do codigo java. Criar os visitors com template.
     public String run() {
+        ST template = groupTemplate.getInstanceOf("program");
 
-        ST template = groupTemplate.getInstanceOf("main");
+        template.add("data", resolveData());
+        template.add("funcs", "");
 
-        runFunction("main", null);
         return template.render();
     }
+
+
+    private List<ST> resolveData() {
+        List<ST> declarationTemplates = new ArrayList<>(dataTypes.size());
+        for (DataDeclaration dataDeclaration : dataTypes.values()) {
+            ST dataTemplate = groupTemplate.getInstanceOf("data");
+            dataTemplate.add("name", dataDeclaration.getId());
+            List<ST> dataDeclarations = new ArrayList<>(dataDeclaration.getTypes().size());
+            for (DataDeclaration.DataType type : dataDeclaration.getTypes()) {
+                ST typeString = groupTemplate.getInstanceOf("decl");
+                typeString.add("type", visit(type.type).getText());
+                typeString.add("id", type.name);
+                dataDeclarations.add(typeString);
+            }
+            dataTemplate.add("decl", dataDeclarations);
+            declarationTemplates.add(dataTemplate);
+        }
+        return declarationTemplates;
+    }
+
+    @Override
+    public Template visitArrayType(LexLangParser.ArrayTypeContext ctx) {
+        return new Template(visit(ctx.type()) + "[]");
+    }
+
+    @Override
+    public Template visitBtype(LexLangParser.BtypeContext ctx) {
+        switch (ctx.typeName.getType()) {
+            case LexLangParser.INT:
+                return new Template("int");
+            case LexLangParser.CHAR:
+                return new Template("char");
+            case LexLangParser.BOOL:
+                return new Template("boolean");
+            case LexLangParser.FLOAT:
+                return new Template("float");
+            default:
+                return new Template(ctx.getText());
+        }
+//        return super.visitBtype(ctx);
+    }
+
+    /*
 
     // Memory management
 
@@ -415,4 +459,5 @@ public class CodeGenerator extends LexLangBaseVisitor<Value> {
 //        return super.visitChildren(node);
 //    }
 
+     */
 }
