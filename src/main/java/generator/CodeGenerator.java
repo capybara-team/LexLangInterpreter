@@ -37,18 +37,22 @@ public class CodeGenerator extends LexLangBaseVisitor<Value> {
 
     Boolean returnCalled = false;
 
-    public CodeGenerator(SemanticAnalyzer analyzer, STGroup groupTemplate) {
+    String fileName;
+
+    public CodeGenerator(SemanticAnalyzer analyzer, STGroup groupTemplate, String fileName) {
         this.groupTemplate = groupTemplate;
 
         this.functionManager = analyzer.getFuncManager();
         this.dataTypes = analyzer.getDataTypes();
         this.functionCalls = analyzer.getFunctionCalls();
         this.variablesDeclared = analyzer.getVariablesDeclared();
+        this.fileName = fileName;
     }
 
 
     //TODO Aqui deve inicializar a geraçao do codigo java. Criar os visitors com template.
     public String run() {
+
         ST template = groupTemplate.getInstanceOf("main");
 
         runFunction("main", null);
