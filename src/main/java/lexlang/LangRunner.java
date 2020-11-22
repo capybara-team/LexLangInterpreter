@@ -66,7 +66,7 @@ public class LangRunner {
         ParseTree tree = generateTree(openFile(langPath));
         SemanticAnalyzer analyzer = analyzeFile(tree);
         STGroup group = new STGroupFile("./template/java.stg");
-        CodeGenerator codeGenerator = new CodeGenerator(analyzer,group);
+        CodeGenerator codeGenerator = new CodeGenerator(analyzer,group,getFileWithoutExtension(langPath));
         String javaCode = codeGenerator.run();
         createJavaCodeFile(javaCode, javaPath);
 
@@ -86,8 +86,7 @@ public class LangRunner {
         }
     }
 
-   /* private static String getFileWithoutExtension(String langPath) {
-        return langPath.substring(0, langPath.length()-4);
+    private static String getFileWithoutExtension(String langPath) {
+        return langPath.split(".")[0];
     }
-*/
 }
