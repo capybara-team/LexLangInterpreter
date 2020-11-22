@@ -86,6 +86,6 @@ public class LangRunner {
     }
 
     private static String getFileWithoutExtension(String langPath) {
-        return langPath.split(".")[0];
+        return langPath.split("\\.")[0];
     }
 }
