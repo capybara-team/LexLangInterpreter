@@ -10,6 +10,8 @@ import lexlang.*;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
+import org.stringtemplate.v4.ST;
+import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 import semantics.*;
 
@@ -26,6 +28,7 @@ public class CodeGenerator extends LexLangBaseVisitor<Value> {
     FunctionScope memory = new FunctionScope();
 
     STGroupFile langTemplates;
+    STGroup groupTemplate;
 
     Scanner reader = new Scanner(new InputStreamReader(System.in));
 
@@ -34,19 +37,22 @@ public class CodeGenerator extends LexLangBaseVisitor<Value> {
 
     Boolean returnCalled = false;
 
-    public CodeGenerator(SemanticAnalyzer analyzer) {
-        langTemplates = new STGroupFile("../templates/java.stg");
+    public CodeGenerator(SemanticAnalyzer analyzer, STGroup groupTemplate) {
+        this.groupTemplate = groupTemplate;
+
         this.functionManager = analyzer.getFuncManager();
         this.dataTypes = analyzer.getDataTypes();
         this.functionCalls = analyzer.getFunctionCalls();
         this.variablesDeclared = analyzer.getVariablesDeclared();
     }
 
-    /**
-     * Run a program
-     */
-    public void run() {
+
+    //TODO Aqui deve inicializar a geraçao do codigo java. Criar os visitors com template.
+    public String run() {
+        ST template = groupTemplate.getInstanceOf("main");
+
         runFunction("main", null);
+        return template.render();
     }
 
     // Memory management
