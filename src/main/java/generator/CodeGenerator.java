@@ -24,14 +24,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
-public class CodeGenerator extends LexLangBaseVisitor<Template> {
+public class CodeGenerator extends LexLangBaseVisitor<Object> {
 
 
     private final HashMap<LexLangParser.ExpsContext, FunctionDeclaration> functionCalls;
     private final HashMap<ParserRuleContext, Scope> variablesDeclared;
     FunctionScope memory = new FunctionScope();
 
-    STGroup groupTemplate;
+    STGroup templates;
 
     Scanner reader = new Scanner(new InputStreamReader(System.in));
 
@@ -40,8 +40,8 @@ public class CodeGenerator extends LexLangBaseVisitor<Template> {
 
     Boolean returnCalled = false;
 
-    public CodeGenerator(SemanticAnalyzer analyzer, STGroup groupTemplate) {
-        this.groupTemplate = groupTemplate;
+    public CodeGenerator(SemanticAnalyzer analyzer, STGroup templates) {
+        this.templates = templates;
 
         this.functionManager = analyzer.getFuncManager();
         this.dataTypes = analyzer.getDataTypes();
@@ -52,24 +52,48 @@ public class CodeGenerator extends LexLangBaseVisitor<Template> {
 
     //TODO Aqui deve inicializar a geraçao do codigo java. Criar os visitors com template.
     public String run() {
-        ST template = groupTemplate.getInstanceOf("program");
+        ST template = templates.getInstanceOf("program");
 
-        template.add("data", resolveData());
-        template.add("funcs", "");
+        template.add("data", parseData());
+        template.add("funcs", parseFunctions());
 
         return template.render();
     }
 
+    List<ST> parseFunctions() {
+        List<ST> functionsTemplate = new ArrayList<>();
+        for (String fName : functionManager.getFunctions().keySet())
+            for (FunctionDeclaration f : functionManager.getFunctions(fName)) {
+                ST funcTemplate = templates.getInstanceOf("func");
+                funcTemplate.add("name", f.getId());
+                funcTemplate.add("type", f.getReturnTypes().size() == 0 ? "void" : "Object[]");
+                funcTemplate.add("cmd", "");
 
-    private List<ST> resolveData() {
+                // handle args
+                List<ST> argsTemplate = new ArrayList<>(f.getArguments().size());
+                for (FunctionDeclaration.FunctionArgument argument : f.getArguments()) {
+                    ST arg = templates.getInstanceOf("param");
+                    arg.add("name", argument.name);
+                    arg.add("type", visit(argument.type));
+                    argsTemplate.add(arg);
+                }
+
+                funcTemplate.add("params", argsTemplate);
+                functionsTemplate.add(funcTemplate);
+            }
+        return functionsTemplate;
+    }
+
+
+    private List<ST> parseData() {
         List<ST> declarationTemplates = new ArrayList<>(dataTypes.size());
         for (DataDeclaration dataDeclaration : dataTypes.values()) {
-            ST dataTemplate = groupTemplate.getInstanceOf("data");
+            ST dataTemplate = templates.getInstanceOf("data");
             dataTemplate.add("name", dataDeclaration.getId());
             List<ST> dataDeclarations = new ArrayList<>(dataDeclaration.getTypes().size());
             for (DataDeclaration.DataType type : dataDeclaration.getTypes()) {
-                ST typeString = groupTemplate.getInstanceOf("decl");
-                typeString.add("type", visit(type.type).getText());
+                ST typeString = templates.getInstanceOf("decl");
+                typeString.add("type", ((Template) visit(type.type)).getText());
                 typeString.add("id", type.name);
                 dataDeclarations.add(typeString);
             }
@@ -99,6 +123,30 @@ public class CodeGenerator extends LexLangBaseVisitor<Template> {
                 return new Template(ctx.getText());
         }
 //        return super.visitBtype(ctx);
+    }
+
+
+    public List<ST> visit(List<LexLangParser.CmdContext> ctx) {
+        List<ST> cmds = new ArrayList<>();
+        for (LexLangParser.CmdContext context : ctx) {
+            cmds.add((ST) visit(context));
+        }
+        return cmds;
+    }
+
+    @Override
+    public List<ST> visitFuncCmds(LexLangParser.FuncCmdsContext ctx) {
+        return visit(ctx.cmd());
+    }
+
+    @Override
+    public List<ST> visitMultipleCommands(LexLangParser.MultipleCommandsContext ctx) {
+        return visit(ctx.cmd());
+    }
+
+    @Override
+    public ST visitClosureCmd(LexLangParser.ClosureCmdContext ctx) {
+        return templates.getInstanceOf("closure").add("cmds", visit(ctx.cmds()));
     }
 
     /*
