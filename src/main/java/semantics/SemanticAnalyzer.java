@@ -180,17 +180,18 @@ public class SemanticAnalyzer extends LexLangBaseVisitor<Value> {
         for (String key : funcManager.getFunctions().keySet())
             for (FunctionDeclaration function : funcManager.getFunctions(key)) {
                 this.currentFunction = function;
-                Scope scope = memory.pushScope();
+                memory.pushScope();
                 for (FunctionDeclaration.FunctionArgument argument : function.getArguments())
                     if (memory.getVariable(argument.name) != null)
                         throw new LangException("Function '" + function + "' has multiple arguments '" + argument.name + "'", function.getCommands().getParent());
                     else
                         memory.setVariable(argument.name, resolveType(argument.type));
 
-
+                Scope scope = memory.pushScope(); // local variables
                 visit(function.getCommands());
                 memory.popScope();
-                variablesDeclared.put(ctx, scope);
+                memory.popScope();
+                variablesDeclared.put(function.getCommands(), scope);
 
                 // return validation
                 if (function.getReturnTypes().size() > 0) {
@@ -239,7 +240,10 @@ public class SemanticAnalyzer extends LexLangBaseVisitor<Value> {
         if (ctx.exp() != null) {
             value.setDepth(value.getDepth() + 1);
             Validator.isInt((Type) visit(ctx.exp()));
-        } else if (value.getDepth() != 0) throw new LangException("Array was initialized without size", ctx);
+        } else if (value.getDepth() != 0)
+            throw new LangException("Array was initialized without size", ctx);
+        else if (value.getType() != DefaultTypes.DATA)
+            throw new LangException("'new' command need to be used for initializing Arrays or data structures. Initialized '" + value + "'", ctx);
         return value;
     }
 

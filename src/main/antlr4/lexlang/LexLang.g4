@@ -39,7 +39,8 @@ cmd:
 	| ID '(' (exps)? ')' ('<' lvalue (',' lvalue)* '>')? ';'	# funcCmd
     ;
 cmds: (cmd)*                                                    # multipleCommands;
-exp: exp AND exp # andExp | rexp # rexpCall;
+exp: exp AND exp                            # andExp
+    | rexp                                  # rexpCall;
 rexp:
 	aexp LESS_THAN aexp	                    # lessThanRexp
 	| rexp op=(EQUALS | NOTEQ) aexp	        # compareRexp

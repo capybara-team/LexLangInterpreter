@@ -15,13 +15,13 @@ import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 import semantics.SemanticAnalyzer;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Date;
 
 public class LangRunner {
 
@@ -36,11 +36,12 @@ public class LangRunner {
         ParseTree tree = generateTree(openFile(langPath));
         SemanticAnalyzer analyzer = analyzeFile(tree);
         LangRunner runner = new LangRunner();
-        STGroup group = new STGroupFile(runner.getSTGPath(), "utf-8", '<', '>' );
+//        STGroup group = new STGroupFile(runner.getSTGPath() );
+        STGroup group = new STGroupFile("src/main/resources/java.stg");
         CodeGenerator codeGenerator = new CodeGenerator(analyzer, group);
         String javaCode = codeGenerator.run();
         System.out.println(javaCode);
-//        createJavaCodeFile(javaCode, getFileWithoutExtension(langPath) + ".java");
+        createJavaCodeFile(javaCode, getFileWithoutExtension(langPath) + ".java");
 
     }
 

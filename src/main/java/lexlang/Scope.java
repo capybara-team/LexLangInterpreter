@@ -44,4 +44,8 @@ public class Scope {
     public Scope getParent() {
         return parent;
     }
+
+    public HashMap<String, Value> getMemory() {
+        return memory;
+    }
 }

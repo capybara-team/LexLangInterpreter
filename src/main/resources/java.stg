@@ -1,90 +1,108 @@
 program(data, funcs) ::= <<
-<data; separator="\n\n">
-
+import java.io.InputStreamReader;
+import java.util.Scanner;
 public class Main {
-    <funcs; separator="\n\n">
+
+    <data; separator="\n\n">
+
+    static Scanner _reader = new Scanner(new InputStreamReader(System.in));
+
+    public static int read() {
+        return Integer.valueOf(_reader.nextLine());
+    }
 
     public static void main(String args[]) {
         main();
     }
+
+    <funcs; separator="\n\n">
 }
 >>
 
 data(name, decl) ::= <<
-class <name> {
+static class <name> {
     <decl; separator="\n">
 }
 >>
 
 decl(id, type) ::= "public <type> <id>;"
 
-func(type, name, params, decl, cmd) ::= <<
+func(type, name, params, cmd) ::= <<
 static <type> <name>(<params; separator=", ">) {
-    <if(decl)><decl; separator=";\n">;<endif>
     <cmd>
 }
 >>
 
+contextDecl(decl, cmd) ::= <<
+<if(decl)><decl; separator=";\n">;<endif>
+<cmd>
+>>
+
+multipleCmds(cmds) ::= <<
+<cmds; separator="\n" >
+>>
+
 param(type, name) ::= "<type> <name>"
 
-closure(cmds) ::= <<
+closure(cmds, decl) ::= <<
 {
-    <cmds; separator="\n" >
+    <cmds>
 }
 >>
 
-
-// OLD
-array_type(type) ::= "<type>[]"
-int_type() ::= "int"
-float_type() ::= "float"
-boolean_type() ::= "boolean"
-
-print(expr) ::= "System.out.println(<expr>);"
-return(expr) ::= "return <expr>;"
-
-while(expr, stmt) ::= <<
-while(<expr>) {
-    <stmt>
-}
->>
-
-if(expr, thn, els) ::= <<
+if(expr, cmd, els) ::= <<
 if(<expr>) {
-    <thn>
+    <cmd>
 } <if(els)>else {
     <els>
 }
 <endif>
 >>
 
-stmt_list(stmt1, stmt2) ::= <<
-<stmt1>
-<stmt2>
+iterate(expr, cmd, counter) ::= <<
+for(int _i_<counter> = 0; _i_<counter> \< <expr>; _i_<counter>++) {
+    <cmd>
+}
 >>
 
-attr(var, expr) ::= "<var> = <expr>;"
-lvalue(name, array) ::= "<name><array>"
-array_access(expr) ::= "[<expr>]"
 
-boolean_expr(val) ::= "<val>"
-float_expr(val) ::= "<val>"
-int_expr(val) ::= "<val>"
+print(exp) ::= "System.out.print(<exp>);"
+read(lvalue) ::= "<lvalue> = read();"
+attr(lvalue, exp) ::= "<lvalue> = <exp>;"
 
-new_array(var, type, expr) ::= "<var> = new <type>[<expr>];"
+funcCmd(id, exps, attr, counter) ::= <<
+<if(attr)>Object[] _ret_<counter> = <endif><id>(<exps; separator=", ">);
+<attr; separator="\n">
+>>
 
-call(name, args) ::= <<<name>(<args; separator=", ">)>>
+funcCmdAttr(lvalue, type, index, counter) ::= "<lvalue> = (<type>)_ret_<counter>[<index>];"
 
-mul_expr(left_expr, right_expr) ::= "(<left_expr> * <right_expr>)"
-div_expr(left_expr, right_expr) ::= "(<left_expr> / <right_expr>)"
-mod_expr(left_expr, right_expr) ::= "(<left_expr> % <right_expr>)"
-add_expr(left_expr, right_expr) ::= "(<left_expr> + <right_expr>)"
-sub_expr(left_expr, right_expr) ::= "(<left_expr> - <right_expr>)"
+returnCmd(values) ::= <<return new Object[]{<values; separator=", ">};>>
 
-lt_expr(left_expr, right_expr) ::= "(<left_expr> \< <right_expr>)"
-equals_expr(left_expr, right_expr) ::= "(<left_expr> == <right_expr>)"
-and_expr(left_expr, right_expr) ::= "(<left_expr> && <right_expr>)"
-not_expr(expr) ::= "!<expr>"
+// expressions
+
+andExp(lExp, rExp) ::= "(<lExp> && <rExp>)"
+
+lessThanRexp(lExp, rExp) ::= "<lExp> \< <rExp>"
+eqRexp(lExp, rExp) ::= "<lExp> == <rExp>"
+neqRexp(lExp, rExp) ::= "<lExp> != <rExp>"
+
+plusAexp(lExp, rExp) ::= "<lExp> + <rExp>"
+subAexp(lExp, rExp) ::= "<lExp> - <rExp>"
+multMexp(lExp, rExp) ::= "<lExp> * <rExp>"
+divMexp(lExp, rExp) ::= "<lExp> / <rExp>"
+modMexp(lExp, rExp) ::= "<lExp> % <rExp>"
+
+notSexp(exp) ::= "!<exp>"
+negativeSexp(exp) ::= "-<exp>"
+
+charSexp(exp) ::= "'<exp>'"
+floatSexp(exp) ::= "<exp>f"
+
+closurePexp(exp) ::= "(<exp>)"
+    instancePexp(type, depth, exp) ::= "new <type><if(exp)>[<exp>]<endif><depth>"
+
+funcCallPexp(id, exps, type, exp) ::= <<(<type>) <id>(<exps; separator=", ">)[<exp>]>>
 
 
 literal(val) ::= "<val>"
