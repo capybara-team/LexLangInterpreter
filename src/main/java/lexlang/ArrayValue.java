@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ArrayValue {
-    String type;
+    final String type;
     List<Value> values;
 
     public ArrayValue(int size, String type) {

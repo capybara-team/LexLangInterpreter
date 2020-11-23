@@ -15,7 +15,7 @@ import java.util.List;
 public class DataDeclaration {
     private final String id;
 
-    List<DataType> types = new ArrayList<>();
+    final List<DataType> types = new ArrayList<>();
 
     public DataDeclaration(LexLangParser.DataContext ctx) {
         id = ctx.ID().getText();
@@ -43,8 +43,8 @@ public class DataDeclaration {
     }
 
     public static class DataType {
-        public String name;
-        public LexLangParser.TypeContext type;
+        public final String name;
+        public final LexLangParser.TypeContext type;
 
         public DataType(String name, LexLangParser.TypeContext type) {
             this.name = name;

@@ -14,14 +14,6 @@ public class Template {
         this.text = text;
     }
 
-    boolean isTemplate(){
-        return stringTemplate != null;
-    }
-
-    public ST getTemplate() {
-        return stringTemplate;
-    }
-
     public String getText() {
         return text;
     }

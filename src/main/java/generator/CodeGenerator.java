@@ -6,7 +6,6 @@
 
 package generator;
 
-import lexlang.FunctionScope;
 import lexlang.LexLangBaseVisitor;
 import lexlang.LexLangParser;
 import lexlang.Scope;
@@ -15,25 +14,18 @@ import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import semantics.*;
 
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Scanner;
 
 public class CodeGenerator extends LexLangBaseVisitor<Object> {
     private final HashMap<LexLangParser.ExpsContext, FunctionDeclaration> functionCalls;
     private final HashMap<ParserRuleContext, Scope> variablesDeclared;
-    FunctionScope memory = new FunctionScope();
 
-    STGroup t;
+    final STGroup t;
+    final HashMap<String, DataDeclaration> dataTypes;
+    final FunctionManager functionManager;
 
-    Scanner reader = new Scanner(new InputStreamReader(System.in));
-
-    HashMap<String, DataDeclaration> dataTypes;
-    FunctionManager functionManager;
-
-    Boolean returnCalled = false;
     private int itCounter = -1;
     private int fCounter = -1;
 
@@ -85,6 +77,8 @@ public class CodeGenerator extends LexLangBaseVisitor<Object> {
     }
 
     private ST getContextDeclaration(ParserRuleContext ctx) {
+        if (ctx instanceof LexLangParser.ClosureCmdContext)
+            ctx = ((LexLangParser.ClosureCmdContext) ctx).cmds();
         ST commands = t.getInstanceOf("contextDecl").add("cmd", visit(ctx));
         if (!variablesDeclared.containsKey(ctx))
             return commands;
@@ -122,23 +116,23 @@ public class CodeGenerator extends LexLangBaseVisitor<Object> {
         if (typeObj.getType() == DefaultTypes.NULL)
             return "null";
 
-        String type;
+        StringBuilder type;
         if (typeObj.getType() == DefaultTypes.Int)
-            type = "int";
+            type = new StringBuilder("int");
         else if (typeObj.getType() == DefaultTypes.Bool)
-            type = "boolean";
+            type = new StringBuilder("boolean");
         else if (typeObj.getType() == DefaultTypes.Char)
-            type = "char";
+            type = new StringBuilder("char");
         else if (typeObj.getType() == DefaultTypes.Float)
-            type = "float";
+            type = new StringBuilder("float");
         else
-            type = typeObj.getDataType().getId();
+            type = new StringBuilder(typeObj.getDataType().getId());
 
         for (int i = 0; i < typeObj.getDepth(); i++) {
-            type += "[]";
+            type.append("[]");
         }
 
-        return type;
+        return type.toString();
     }
 
     @Override
@@ -312,7 +306,7 @@ public class CodeGenerator extends LexLangBaseVisitor<Object> {
                 template.add("depth", type.substring(arrayStart));
                 type = type.substring(0, arrayStart);
             }
-        } else type +="()";
+        } else type += "()";
         return template.add("type", type);
     }
 

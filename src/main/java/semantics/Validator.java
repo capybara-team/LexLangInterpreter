@@ -6,9 +6,9 @@
 package semantics;
 
 public class Validator {
-    static Type INT = new Type(DefaultTypes.Int);
-    static Type FLOAT = new Type(DefaultTypes.Float);
-    static Type BOOL = new Type(DefaultTypes.Bool);
+    static final Type INT = new Type(DefaultTypes.Int);
+    static final Type FLOAT = new Type(DefaultTypes.Float);
+    static final Type BOOL = new Type(DefaultTypes.Bool);
 
     static void isNumber(Type type) {
         if (!type.equals(INT) && !type.equals(FLOAT))

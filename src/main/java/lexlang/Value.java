@@ -9,8 +9,8 @@ package lexlang;
 public class Value {
     final Object primitive;
 
-    public static Value VOID = new Value(null);
-    public static Value EMPTY_CHAR = new Value(Character.MIN_VALUE);
+    public static final Value VOID = new Value(null);
+    public static final Value EMPTY_CHAR = new Value(Character.MIN_VALUE);
 
     public Value(Object value) {
         this.primitive = value;

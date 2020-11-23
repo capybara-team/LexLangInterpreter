@@ -19,10 +19,10 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
     private final HashMap<LexLangParser.ExpsContext, FunctionDeclaration> functionCalls;
     FunctionScope memory = new FunctionScope();
 
-    Scanner reader = new Scanner(new InputStreamReader(System.in));
+    final Scanner reader = new Scanner(new InputStreamReader(System.in));
 
-    HashMap<String, DataDeclaration> dataTypes;
-    FunctionManager functionManager;
+    final HashMap<String, DataDeclaration> dataTypes;
+    final FunctionManager functionManager;
 
     Boolean returnCalled = false;
 
@@ -187,7 +187,7 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
 
     @Override
     public Value visitReturnCmd(LexLangParser.ReturnCmdContext ctx) {
-        ArrayList<Value> ret = new ArrayList<Value>();
+        ArrayList<Value> ret = new ArrayList<>();
         for (LexLangParser.ExpContext expContext : ctx.exp()) {
             ret.add(visit(expContext));
 
@@ -380,7 +380,7 @@ public class LangInterpreter extends LexLangBaseVisitor<Value> {
         String response = reader.nextLine();
         int val;
         try {
-            val = Integer.valueOf(response);
+            val = Integer.parseInt(response);
         } catch (Exception e) {
             throw new LangException("Read error: 'Int' expected, received '" + response + "'", ctx);
         }

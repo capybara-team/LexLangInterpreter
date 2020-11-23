@@ -24,6 +24,12 @@ O programa recebem por parâmetro o caminho do arquivo de programa lang a ser ex
 java -jar target/compile-V-0.0.1-jar-with-dependencies.jar caminho/do/programa.lang
 ```
 
+caso queira converter em código java, basta informar a tag `-gc`
+
+```bash js
+java -jar target/compile-V-0.0.1-jar-with-dependencies.jar -gc caminho/do/programa.lang
+```
+
 ## Exemplo de programa
 
 ```c++

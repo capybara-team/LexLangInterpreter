@@ -16,12 +16,12 @@ import java.util.List;
 
 public class SemanticAnalyzer extends LexLangBaseVisitor<Value> {
 
-    FunctionScope memory = new FunctionScope();
-    HashMap<String, DataDeclaration> dataTypes = new HashMap<>();
-    FunctionManager funcManager = new FunctionManager();
-    HashMap<LexLangParser.ExpsContext, FunctionDeclaration> functionCalls = new HashMap<>();
+    final FunctionScope memory = new FunctionScope();
+    final HashMap<String, DataDeclaration> dataTypes = new HashMap<>();
+    final FunctionManager funcManager = new FunctionManager();
+    final HashMap<LexLangParser.ExpsContext, FunctionDeclaration> functionCalls = new HashMap<>();
     FunctionDeclaration currentFunction = null;
-    HashMap<ParserRuleContext, Scope> variablesDeclared = new HashMap<ParserRuleContext, Scope>();
+    final HashMap<ParserRuleContext, Scope> variablesDeclared = new HashMap<>();
 
     public HashMap<ParserRuleContext, Scope> getVariablesDeclared() {
         return variablesDeclared;

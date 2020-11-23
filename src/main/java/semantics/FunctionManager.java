@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class FunctionManager {
-    HashMap<String, List<FunctionDeclaration>> functions = new HashMap<>();
+    final HashMap<String, List<FunctionDeclaration>> functions = new HashMap<>();
 
     public HashMap<String, List<FunctionDeclaration>> getFunctions() {
         return functions;

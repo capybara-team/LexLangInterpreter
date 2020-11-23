@@ -11,8 +11,8 @@ import semantics.DataDeclaration;
 import java.util.HashMap;
 
 public class Data {
-    DataDeclaration type;
-    HashMap<String, Value> values = new HashMap<>();
+    final DataDeclaration type;
+    final HashMap<String, Value> values = new HashMap<>();
 
     public Data(DataDeclaration type) {
         this.type = type;

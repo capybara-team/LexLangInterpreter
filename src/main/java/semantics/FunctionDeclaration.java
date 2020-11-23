@@ -15,11 +15,11 @@ import java.util.List;
 public class FunctionDeclaration {
     private final String id;
 
-    List<FunctionArgument> arguments = new ArrayList<>();
+    final List<FunctionArgument> arguments = new ArrayList<>();
 
-    List<LexLangParser.TypeContext> returnTypes = new ArrayList<>();
+    final List<LexLangParser.TypeContext> returnTypes = new ArrayList<>();
 
-    LexLangParser.FuncCmdsContext commands;
+    final LexLangParser.FuncCmdsContext commands;
 
     public FunctionDeclaration(LexLangParser.FuncContext ctx) {
         id = ctx.ID().getText();
@@ -54,8 +54,8 @@ public class FunctionDeclaration {
     }
 
     public static class FunctionArgument {
-        public String name;
-        public LexLangParser.TypeContext type;
+        public final String name;
+        public final LexLangParser.TypeContext type;
 
         public FunctionArgument(String name, LexLangParser.TypeContext type) {
             this.name = name;

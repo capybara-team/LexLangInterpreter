@@ -120,6 +120,7 @@ public class LangRunner {
                     final File apps = new File(url.toURI());
                     return apps.getPath();
                 } catch (URISyntaxException ex) {
+                    System.err.println(ex.getMessage());
                 }
             }
         }
