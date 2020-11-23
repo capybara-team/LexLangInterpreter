@@ -22,6 +22,9 @@ import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 public class LangRunner {
 
@@ -36,7 +39,12 @@ public class LangRunner {
         ParseTree tree = generateTree(openFile(langPath));
         SemanticAnalyzer analyzer = analyzeFile(tree);
         LangRunner runner = new LangRunner();
-        STGroup group = new STGroupFile(runner.getSTGPath(), "utf-8", '<', '>' );
+        STGroup group = null;
+        try {
+            group = new STGroupFile(runner.getSTGPath(), "utf-8", '<', '>' );
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         CodeGenerator codeGenerator = new CodeGenerator(analyzer, group);
         String javaCode = codeGenerator.run();
         System.out.println(javaCode);
@@ -88,26 +96,31 @@ public class LangRunner {
         }
     }
 
-    private static String getFileWithoutExtension(String langPath) {
-        return langPath.split(".")[0];
-    }
+    private String getSTGPath() throws IOException {
+        final String path = "java.stg";
+        final File jarFile = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
+        System.out.println(jarFile);
+        if(jarFile.isFile()) {
+            final JarFile jar = new JarFile(jarFile);
+            final Enumeration<JarEntry> entries = jar.entries(); //gives ALL entries in jar
+            while(entries.hasMoreElements()) {
 
-    private String getSTGPath(){
-        File resourceFile = null;
-        URL location = LangRunner.class.getProtectionDomain().getCodeSource().getLocation();
-        String codeLocation = location.toString();
-        try{
-            if (codeLocation.endsWith(".jar")){
-                //Call from jar
-                Path path = Paths.get(location.toURI()).resolve("../classes/" + "java.stg").normalize();
-                resourceFile = path.toFile();
-            }else{
-                //Call from IDE
-                resourceFile = new File(LangRunner.class.getClassLoader().getResource("java.stg").getPath());
+                final String name = entries.nextElement().getName();
+                if (name.startsWith(path)) {
+                    return name;
+                }
             }
-        }catch(URISyntaxException ex){
-            ex.printStackTrace();
+            jar.close();
+        } else {
+            final URL url = LangRunner.class.getResource("/" + path);
+            if (url != null) {
+                try {
+                    final File apps = new File(url.toURI());
+                    return apps.getPath();
+                } catch (URISyntaxException ex) {
+                }
+            }
         }
-        return resourceFile.getPath();
+        return null;
     }
 }
