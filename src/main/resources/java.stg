@@ -53,7 +53,7 @@ closure(cmds, decl) ::= <<
 if(expr, cmd, els) ::= <<
 if(<expr>) {
     <cmd>
-} <if(els)>else {
+}<if(els)> else {
     <els>
 }
 <endif>

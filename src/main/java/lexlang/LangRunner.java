@@ -45,8 +45,8 @@ public class LangRunner {
         }
         CodeGenerator codeGenerator = new CodeGenerator(analyzer, group);
         String javaCode = codeGenerator.run();
-        System.out.println(javaCode);
-        createJavaCodeFile(javaCode, getFileWithoutExtension(langPath) + ".java");
+//        System.out.println(javaCode);
+        createJavaCodeFile(javaCode, "Main.java");
 
     }
 
