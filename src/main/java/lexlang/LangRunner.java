@@ -20,9 +20,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -42,7 +39,7 @@ public class LangRunner {
         LangRunner runner = new LangRunner();
         STGroup group = null;
         try {
-            group = new STGroupFile(runner.getSTGPath(), "utf-8", '<', '>' );
+            group = new STGroupFile(runner.getSTGPath(), "utf-8", '<', '>');
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -97,14 +94,18 @@ public class LangRunner {
         }
     }
 
+    private static String getFileWithoutExtension(String langPath) {
+        return langPath.split("\\.")[0];
+    }
+
     private String getSTGPath() throws IOException {
         final String path = "java.stg";
         final File jarFile = new File(getClass().getProtectionDomain().getCodeSource().getLocation().getPath());
         System.out.println(jarFile);
-        if(jarFile.isFile()) {
+        if (jarFile.isFile()) {
             final JarFile jar = new JarFile(jarFile);
             final Enumeration<JarEntry> entries = jar.entries(); //gives ALL entries in jar
-            while(entries.hasMoreElements()) {
+            while (entries.hasMoreElements()) {
 
                 final String name = entries.nextElement().getName();
                 if (name.startsWith(path)) {
