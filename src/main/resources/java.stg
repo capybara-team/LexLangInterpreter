@@ -1,3 +1,8 @@
+/*
+ Maxwell Souza 201435009
+ Rodolpho Rossete 201435032
+ */
+
 program(data, funcs) ::= <<
 import java.io.InputStreamReader;
 import java.util.Scanner;
@@ -6,6 +11,7 @@ public class Main {
     <data; separator="\n\n">
 
     static Scanner _reader = new Scanner(new InputStreamReader(System.in));
+    static Object[] _ret;
 
     public static int read() {
         return Integer.valueOf(_reader.nextLine());
@@ -60,7 +66,8 @@ if(<expr>) {
 >>
 
 iterate(expr, cmd, counter) ::= <<
-for(int _i_<counter> = 0; _i_<counter> \< <expr>; _i_<counter>++) {
+int _cond_<counter> = <expr>;
+for(int _i_<counter> = 0; _i_<counter> \< _cond_<counter>; _i_<counter>++) {
     <cmd>
 }
 >>
@@ -71,11 +78,11 @@ read(lvalue) ::= "<lvalue> = read();"
 attr(lvalue, exp) ::= "<lvalue> = <exp>;"
 
 funcCmd(id, exps, attr, counter) ::= <<
-<if(attr)>Object[] _ret_<counter> = <endif><id>(<exps; separator=", ">);
+<if(attr)>_ret = <endif><id>(<exps; separator=", ">);
 <attr; separator="\n">
 >>
 
-funcCmdAttr(lvalue, type, index, counter) ::= "<lvalue> = (<type>)_ret_<counter>[<index>];"
+funcCmdAttr(lvalue, type, index, counter) ::= "<lvalue> = (<type>)_ret[<index>];"
 
 returnCmd(values) ::= <<return new Object[]{<values; separator=", ">};>>
 
@@ -100,9 +107,6 @@ charSexp(exp) ::= "'<exp>'"
 floatSexp(exp) ::= "<exp>f"
 
 closurePexp(exp) ::= "(<exp>)"
-    instancePexp(type, depth, exp) ::= "new <type><if(exp)>[<exp>]<endif><depth>"
+instancePexp(type, depth, exp) ::= "new <type><if(exp)>[<exp>]<endif><depth>"
 
 funcCallPexp(id, exps, type, exp) ::= <<(<type>) <id>(<exps; separator=", ">)[<exp>]>>
-
-
-literal(val) ::= "<val>"

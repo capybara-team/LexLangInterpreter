@@ -27,7 +27,6 @@ public class CodeGenerator extends LexLangBaseVisitor<Object> {
     final FunctionManager functionManager;
 
     private int itCounter = -1;
-    private int fCounter = -1;
 
     public CodeGenerator(SemanticAnalyzer analyzer, STGroup templates) {
         this.t = templates;
@@ -233,7 +232,6 @@ public class CodeGenerator extends LexLangBaseVisitor<Object> {
     public ST visitFuncCmd(LexLangParser.FuncCmdContext ctx) {
         FunctionDeclaration func = getFunction(ctx.ID().getText(), ctx.exps());
         ST template = t.getInstanceOf("funcCmd");
-        fCounter++;
         if (ctx.lvalue().size() > 0) {
             List<ST> attributions = new ArrayList<>();
             List<Object> variables = visitList(ctx.lvalue());
@@ -242,7 +240,6 @@ public class CodeGenerator extends LexLangBaseVisitor<Object> {
                         t.getInstanceOf("funcCmdAttr")
                                 .add("lvalue", variables.get(i))
                                 .add("type", visit(func.getReturnTypes().get(i)))
-                                .add("counter", fCounter)
                                 .add("index", i)
 
                 );
@@ -253,8 +250,7 @@ public class CodeGenerator extends LexLangBaseVisitor<Object> {
             template.add("exps", visitList(ctx.exps().exp()));
 
         return template
-                .add("id", ctx.ID().getText())
-                .add("counter", fCounter);
+                .add("id", ctx.ID().getText());
     }
 
     @Override
